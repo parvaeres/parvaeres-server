@@ -16,7 +16,7 @@ import (
 // DeploymentForm struct for DeploymentForm
 type DeploymentForm struct {
 	Repository *string `json:"repository,omitempty"`
-	Email *string `json:"email,omitempty"`
+	Email      *string `json:"email,omitempty"`
 }
 
 // NewDeploymentForm instantiates a new DeploymentForm object
@@ -146,5 +146,3 @@ func (v *NullableDeploymentForm) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

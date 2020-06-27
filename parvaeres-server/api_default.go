@@ -26,11 +26,10 @@ var (
 type DefaultApiService service
 
 type apiDeploymentDeploymentIdGetRequest struct {
-	ctx _context.Context
-	apiService *DefaultApiService
+	ctx          _context.Context
+	apiService   *DefaultApiService
 	deploymentId string
 }
-
 
 /*
 DeploymentDeploymentIdGet Get the deployment with id deploymentId
@@ -40,8 +39,8 @@ DeploymentDeploymentIdGet Get the deployment with id deploymentId
 */
 func (a *DefaultApiService) DeploymentDeploymentIdGet(ctx _context.Context, deploymentId string) apiDeploymentDeploymentIdGetRequest {
 	return apiDeploymentDeploymentIdGetRequest{
-		apiService: a,
-		ctx: ctx,
+		apiService:   a,
+		ctx:          ctx,
 		deploymentId: deploymentId,
 	}
 }
@@ -66,12 +65,11 @@ func (r apiDeploymentDeploymentIdGetRequest) Execute() (Deployment, *_nethttp.Re
 	}
 
 	localVarPath := localBasePath + "/deployment/{deploymentId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"deploymentId"+"}", _neturl.PathEscape(parameterToString(r.deploymentId, "")) , -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"deploymentId"+"}", _neturl.PathEscape(parameterToString(r.deploymentId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
-	
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -125,13 +123,13 @@ func (r apiDeploymentDeploymentIdGetRequest) Execute() (Deployment, *_nethttp.Re
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
 type apiDeploymentPostRequest struct {
-	ctx _context.Context
+	ctx        _context.Context
 	apiService *DefaultApiService
 	repository *string
-	email *string
+	email      *string
 }
-
 
 func (r apiDeploymentPostRequest) Repository(repository string) apiDeploymentPostRequest {
 	r.repository = &repository
@@ -151,7 +149,7 @@ DeploymentPost Create a new deployment
 func (a *DefaultApiService) DeploymentPost(ctx _context.Context) apiDeploymentPostRequest {
 	return apiDeploymentPostRequest{
 		apiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -179,7 +177,7 @@ func (r apiDeploymentPostRequest) Execute() (DeploymentAcceptedResponse, *_netht
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
-		
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/x-www-form-urlencoded"}
 

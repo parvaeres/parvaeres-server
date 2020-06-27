@@ -3,16 +3,22 @@
 # Generate server stubs for ParvaeRes API
 # 
 
+# docker run -ti --rm openapitools/openapi-generator-cli $@ ; exit 0
+
+DESTINATION=parvaeres-server
+
 docker run \
     --rm \
     --user "$(id -u):$(id -g)" \
     --volume "${PWD}:/local" \
     --workdir "/local" \
-    --env GIT_USER_ID=ContainerSolutions \
-    --env GIT_REPO_ID=parvaeres \
     openapitools/openapi-generator-cli \
         generate \
-        -i parvaeres-api.yaml \
-        -c openapi-config.yaml \
-        -g go-experimental \
-        -o parvaeres-server
+        --input-spec parvaeres-api.yaml \
+        --config openapi-config.yaml \
+        --generator-name go-experimental \
+        --git-user-id riccardomc \
+        --git-repo-id parvaeres \
+        --output $DESTINATION
+
+gofmt -w $DESTINATION

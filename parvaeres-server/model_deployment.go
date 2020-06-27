@@ -15,7 +15,7 @@ import (
 
 // Deployment struct for Deployment
 type Deployment struct {
-	Status *string `json:"status,omitempty"`
+	Status   *string   `json:"status,omitempty"`
 	LiveUrls *[]string `json:"liveUrls,omitempty"`
 }
 
@@ -146,5 +146,3 @@ func (v *NullableDeployment) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

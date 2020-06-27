@@ -16,9 +16,9 @@ import (
 // DeploymentAcceptedResponse struct for DeploymentAcceptedResponse
 type DeploymentAcceptedResponse struct {
 	Repository *string `json:"repository,omitempty"`
-	Email *string `json:"email,omitempty"`
-	Message *string `json:"message,omitempty"`
-	Result *string `json:"result,omitempty"`
+	Email      *string `json:"email,omitempty"`
+	Message    *string `json:"message,omitempty"`
+	Result     *string `json:"result,omitempty"`
 }
 
 // NewDeploymentAcceptedResponse instantiates a new DeploymentAcceptedResponse object
@@ -218,5 +218,3 @@ func (v *NullableDeploymentAcceptedResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
