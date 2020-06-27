@@ -1,0 +1,87 @@
+openapi: 3.0.0
+
+info:
+  title: Parvaeres API
+  description: Parvaeres magic deployment API
+  version: 0.0.1
+
+servers:
+  - url: http://api.alpha.parvaeres.io/v1
+    description: Here we go, let's make this happen!
+
+paths:
+
+  /deployment:
+    summary: Deployments
+    description: This resource represents the deployments in the system
+    post:
+      summary: Create a new deployment
+      requestBody:
+        description: Repository and email address in an HTML form
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeploymentForm'
+      responses:
+        '202': #Accepted
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentAcceptedResponse'
+
+  /deployment/{deploymentId}:
+    summary: A deployment
+    description: This resource represents an individual deployment
+    get:
+      summary: Get the deployment with id deploymentId
+      parameters:
+        - in: path
+          name: deploymentId
+          schema:
+            type: string
+          required: true
+          description: the id of the deployment to retrieve
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployment'
+
+components:
+  schemas:
+   
+    DeploymentForm:
+      type: object
+      properties:
+        repository:
+          type: string
+        email:
+          type: string
+    
+    DeploymentAcceptedResponse:
+      type: object
+      properties:
+        repository:
+          type: string
+        email:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+    
+    Deployment:
+      type: object
+      properties:
+        status:
+          type: string
+        liveUrls:
+          type: array
+          items:
+            type: string
+
+

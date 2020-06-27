@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  description: Parvaeres magic deployment API
+  title: Parvaeres API
+  version: 0.0.1
+servers:
+- description: Here we go, let's make this happen!
+  url: http://api.alpha.parvaeres.io/v1
+paths:
+  /deployment:
+    description: This resource represents the deployments in the system
+    post:
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeploymentForm'
+        description: Repository and email address in an HTML form
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentAcceptedResponse'
+          description: Accepted
+      summary: Create a new deployment
+    summary: Deployments
+  /deployment/{deploymentId}:
+    description: This resource represents an individual deployment
+    get:
+      parameters:
+      - description: the id of the deployment to retrieve
+        explode: false
+        in: path
+        name: deploymentId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployment'
+          description: OK
+      summary: Get the deployment with id deploymentId
+    summary: A deployment
+components:
+  schemas:
+    DeploymentForm:
+      properties:
+        repository:
+          type: string
+        email:
+          type: string
+      type: object
+    DeploymentAcceptedResponse:
+      example:
+        result: result
+        repository: repository
+        message: message
+        email: email
+      properties:
+        repository:
+          type: string
+        email:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+      type: object
+    Deployment:
+      example:
+        liveUrls:
+        - liveUrls
+        - liveUrls
+        status: status
+      properties:
+        status:
+          type: string
+        liveUrls:
+          items:
+            type: string
+          type: array
+      type: object
