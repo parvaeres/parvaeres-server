@@ -16,9 +16,10 @@ docker run \
         generate \
         --input-spec parvaeres-api.yaml \
         --config openapi-config.yaml \
-        --generator-name go-experimental \
+        --generator-name go-server \
         --git-user-id riccardomc \
         --git-repo-id parvaeres \
         --output $DESTINATION
 
 gofmt -w $DESTINATION
+goimports -w $DESTINATION
