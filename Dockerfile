@@ -1,6 +1,6 @@
 FROM golang:1.10 AS build
 WORKDIR /go/src
-COPY go ./go
+COPY pkg ./pkg
 COPY main.go .
 
 ENV CGO_ENABLED=0

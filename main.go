@@ -13,7 +13,7 @@ import (
 	"log"
 	"net/http"
 
-	parvaeres "github.com/riccardomc/parvaeres/go"
+	parvaeres "github.com/riccardomc/parvaeres/pkg"
 )
 
 func main() {

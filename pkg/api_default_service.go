@@ -35,11 +35,5 @@ func (s *DefaultApiService) DeploymentDeploymentIdGet(deploymentId string) (inte
 func (s *DefaultApiService) DeploymentPost(repository string, email string) (interface{}, error) {
 	// TODO - update DeploymentPost with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	// generate UUID
-	// create Deployment{email, repository, UUID, created_at_timestamp, status}
-	// store Deployment in data store
-	// create corresponding ArgoCD Application object
-	// write it in k8s
 	return nil, errors.New("service method 'DeploymentPost' not implemented")
 }

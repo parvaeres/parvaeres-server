@@ -3,9 +3,9 @@
 # Generate server stubs for ParvaeRes API
 # 
 
-# docker run -ti --rm openapitools/openapi-generator-cli $@ ; exit 0
+#docker run -ti --rm openapitools/openapi-generator-cli $@ ; exit 0
 
-DESTINATION=parvaeres-server
+DESTINATION=./
 
 docker run \
     --rm \

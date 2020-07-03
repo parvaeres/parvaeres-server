@@ -1,0 +1,14 @@
+.openapi-generator-ignore
+Dockerfile
+README.md
+api/openapi.yaml
+go.mod
+main.go
+pkg/api.go
+pkg/api_default.go
+pkg/api_default_service.go
+pkg/logger.go
+pkg/model_deployment.go
+pkg/model_deployment_accepted_response.go
+pkg/model_deployment_form.go
+pkg/routers.go
