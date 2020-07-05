@@ -94,3 +94,15 @@ func newApplication(email string, repoURL string) (*v1alpha1.Application, error)
 
 	return newApplication, nil
 }
+
+func listApplications() ([]*v1alpha1.Application, error) {
+	client, err := getArgoCDClient()
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to list Applications")
+	}
+
+	listOptions := metav1.ListOptions{}
+	client.ArgoprojV1alpha1().Applications(argocdNamespace).List(listOptions)
+
+	return nil, nil
+}
