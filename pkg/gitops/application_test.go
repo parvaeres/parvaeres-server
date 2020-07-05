@@ -29,3 +29,14 @@ func TestGenerateApplication(t *testing.T) {
 	})
 
 }
+
+func TestGetArgoCDClient(t *testing.T) {
+	Convey("When trying to get a client outside the cluster", t, func() {
+		clientset, err := getArgoCDClient()
+		Convey("Then it fails", func() {
+			So(err, ShouldNotBeNil)
+			So(clientset, ShouldBeNil)
+			So(err.Error(), ShouldStartWith, "unable to load in-cluster configuration")
+		})
+	})
+}
