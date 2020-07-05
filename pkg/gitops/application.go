@@ -80,8 +80,7 @@ func getDefaultApplication() *v1alpha1.Application {
 }
 
 // GenerateApplication returns an ArgoCD Application relative to email and repoURL
-func GenerateApplication(email string, repoURL string) (*v1alpha1.Application, error) {
-
+func newApplication(email string, repoURL string) (*v1alpha1.Application, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err

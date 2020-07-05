@@ -13,7 +13,7 @@ func TestGenerateApplication(t *testing.T) {
 		inputURL := "http://blabla"
 		inputEmail := "my@email.com"
 		Convey("When creating an Application", func() {
-			newApplication, err := GenerateApplication(inputEmail, inputURL)
+			newApplication, err := newApplication(inputEmail, inputURL)
 			Convey("Then the Application fields are populated as expected", func() {
 				So(err, ShouldBeNil)
 				So(newApplication.Spec.Source.RepoURL, ShouldEqual, inputURL)
