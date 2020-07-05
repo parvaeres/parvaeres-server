@@ -1,3 +1,8 @@
+# Parvaeres
+Concordia parvae res crescunt - Small things grow in harmony.
+
+You write your applications. Parvares deploys them.
+
 # Go API Server for parvaeres
 
 Parvaeres magic deployment API
