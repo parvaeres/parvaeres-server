@@ -8,6 +8,7 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
 	k8s.io/apimachinery v0.16.6
+	k8s.io/client-go v11.0.1-0.20190816222228-6d55c1b1f1ca+incompatible
 	k8s.io/kubernetes v1.16.6 // indirect
 )
 
