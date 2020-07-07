@@ -1,4 +1,4 @@
-package parvaeres
+package gitops
 
 import (
 	"testing"

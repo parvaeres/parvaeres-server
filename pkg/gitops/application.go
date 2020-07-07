@@ -1,6 +1,7 @@
-package parvaeres
+package gitops
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
@@ -95,14 +96,29 @@ func newApplication(email string, repoURL string) (*v1alpha1.Application, error)
 	return newApplication, nil
 }
 
-func listApplications() ([]*v1alpha1.Application, error) {
+func createApplication(application *v1alpha1.Application) error {
+	client, err := getArgoCDClient()
+	if err != nil {
+		return errors.Wrap(err, "Unable to create application")
+	}
+
+	_, err = client.ArgoprojV1alpha1().Applications(argocdNamespace).Create(application)
+
+	return err
+}
+
+func listApplications(email string, repoURL string) (*v1alpha1.ApplicationList, error) {
 	client, err := getArgoCDClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to list Applications")
 	}
 
-	listOptions := metav1.ListOptions{}
-	client.ArgoprojV1alpha1().Applications(argocdNamespace).List(listOptions)
+	selector := fmt.Sprintf("parvaeres-email=%s, parvaeres-repoURL=%s", email, repoURL)
 
-	return nil, nil
+	apps, err := client.ArgoprojV1alpha1().Applications(argocdNamespace).List(
+		metav1.ListOptions{
+			LabelSelector: selector,
+		})
+
+	return apps, errors.Wrap(err, "Unable to list applications")
 }
