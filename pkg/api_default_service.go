@@ -11,6 +11,9 @@ package parvaeres
 
 import (
 	"errors"
+	"log"
+
+	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
 
 // DefaultApiService is a service that implents the logic for the DefaultApiServicer
@@ -35,5 +38,15 @@ func (s *DefaultApiService) DeploymentDeploymentIdGet(deploymentId string) (inte
 func (s *DefaultApiService) DeploymentPost(repository string, email string) (interface{}, error) {
 	// TODO - update DeploymentPost with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-	return nil, errors.New("service method 'DeploymentPost' not implemented")
+	err := gitops.PostApplication(repository, email)
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
+	return DeploymentAcceptedResponse{
+		Repository: repository,
+		Email:      email,
+		Message:    "OK",
+		Result:     "OK",
+	}, nil
 }
