@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: parvaeres-server
+  name: parvaeres-server
+  namespace: argocd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: parvaeres-server
+  template:
+    metadata:
+      labels:
+        app: parvaeres-server
+    spec:
+      containers:
+      - image: registry.local:5000/parvaeres:latest
+        imagePullPolicy: Always
+        name: parvaeres
+        ports:
+        - containerPort: 8080
+      serviceAccount: argocd-server
+      serviceAccountName: argocd-server
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: parvaeres-server
+  name: parvaeres-server
+  namespace: argocd
+spec:
+  ports:
+  - name: 8080-8080
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: parvaeres-server
+  type: ClusterIP
+status:
+  loadBalancer: {}
