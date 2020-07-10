@@ -1,11 +1,13 @@
-FROM golang:1.10 AS build
+FROM golang:1.14 AS build
 WORKDIR /go/src
-COPY pkg ./pkg
-COPY main.go .
 
+COPY go.mod go.mod
+COPY go.sum go.sum
+RUN go mod download
+
+COPY pkg pkg
+COPY main.go main.go
 ENV CGO_ENABLED=0
-RUN go get -d -v ./...
-
 RUN go build -a -installsuffix cgo -o parvaeres .
 
 FROM scratch AS runtime
