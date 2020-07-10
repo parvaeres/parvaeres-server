@@ -40,8 +40,13 @@ func (s *DefaultApiService) DeploymentPost(repository string, email string) (int
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 	err := gitops.PostApplication(repository, email)
 	if err != nil {
-		log.Printf(err.Error())
-		return nil, err
+		log.Printf("PostApplication failed: %s", err.Error())
+		return DeploymentAcceptedResponse{
+			Repository: repository,
+			Email:      email,
+			Message:    err.Error(),
+			Result:     "NOK",
+		}, err
 	}
 	return DeploymentAcceptedResponse{
 		Repository: repository,
