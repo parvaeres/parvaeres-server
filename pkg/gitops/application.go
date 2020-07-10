@@ -48,7 +48,7 @@ func getDefaultApplication() *v1alpha1.Application {
 	return &v1alpha1.Application{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "defaultApplication",
-			Namespace: "default",
+			Namespace: argocdNamespace,
 			Annotations: map[string]string{
 				"parvaeres-email":   "",
 				"parvaeres-repoURL": "",
