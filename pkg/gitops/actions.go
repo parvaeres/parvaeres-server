@@ -1,6 +1,8 @@
 package gitops
 
-import "github.com/pkg/errors"
+import (
+	"github.com/pkg/errors"
+)
 
 /*PostApplication implements the flow in response to an Application creation request
 *
@@ -12,7 +14,7 @@ func PostApplication(repoURL string, email string) error {
 	if err != nil {
 		return errors.Wrap(err, "PostApplication failed")
 	}
-	if existingApplications.Size() > 0 {
+	if len(existingApplications.Items) > 0 {
 		return errors.Errorf("application exists")
 	}
 	newApplication, err := newApplication(email, repoURL)
