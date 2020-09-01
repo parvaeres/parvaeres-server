@@ -14,7 +14,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/DeploymentForm'
+              $ref: '#/components/schemas/CreateDeploymentRequest'
         description: Repository and email address in an HTML form
         required: true
       responses:
@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DeploymentAcceptedResponse'
+                $ref: '#/components/schemas/CreateDeploymentResponse'
           description: Accepted
       summary: Create a new deployment
     summary: Deployments
@@ -43,45 +43,49 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Deployment'
+                $ref: '#/components/schemas/DeploymentStatus'
           description: OK
       summary: Get the deployment with id deploymentId
     summary: A deployment
 components:
   schemas:
-    DeploymentForm:
+    CreateDeploymentRequest:
       properties:
-        repository:
+        Email:
           type: string
-        email:
+        Repository:
           type: string
       type: object
-    DeploymentAcceptedResponse:
+    CreateDeploymentResponse:
       example:
-        result: result
-        repository: repository
-        message: message
-        email: email
+        Message: Message
+        Error: true
+        DeploymentStatus: '{}'
       properties:
-        repository:
+        Message:
           type: string
-        email:
-          type: string
-        message:
-          type: string
-        result:
-          type: string
+        Error:
+          type: boolean
+        DeploymentStatus:
+          allOf:
+          - $ref: '#/components/schemas/DeploymentStatus'
+          type: object
       type: object
-    Deployment:
+    DeploymentStatus:
       example:
-        liveUrls:
-        - liveUrls
-        - liveUrls
-        status: status
+        Status: PENDING
+        LiveURLs:
+        - LiveURLs
+        - LiveURLs
       properties:
-        status:
+        Status:
+          enum:
+          - PENDING
+          - SYNCING
+          - DEPLOYED
+          - ERROR
           type: string
-        liveUrls:
+        LiveURLs:
           items:
             type: string
           type: array

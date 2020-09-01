@@ -9,8 +9,8 @@
 
 package parvaeres
 
-type DeploymentForm struct {
-	Repository string `json:"repository,omitempty"`
+type DeploymentStatus struct {
+	Status string `json:"Status,omitempty"`
 
-	Email string `json:"email,omitempty"`
+	LiveURLs []string `json:"LiveURLs,omitempty"`
 }

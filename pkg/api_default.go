@@ -48,7 +48,7 @@ func (c *DefaultApiController) Routes() Routes {
 func (c *DefaultApiController) DeploymentDeploymentIdGet(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	deploymentId := params["deploymentId"]
-	result, err := c.service.DeploymentDeploymentIdGet(deploymentId)
+	result, err := c.service.DeploymentDeploymentIdGet(r.Context(), deploymentId)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -65,9 +65,9 @@ func (c *DefaultApiController) DeploymentPost(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	repository := r.FormValue("repository")
 	email := r.FormValue("email")
-	result, err := c.service.DeploymentPost(repository, email)
+	repository := r.FormValue("repository")
+	result, err := c.service.DeploymentPost(r.Context(), email, repository)
 	if err != nil {
 		w.WriteHeader(500)
 		return

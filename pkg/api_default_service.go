@@ -10,10 +10,8 @@
 package parvaeres
 
 import (
+	"context"
 	"errors"
-	"log"
-
-	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
 
 // DefaultApiService is a service that implents the logic for the DefaultApiServicer
@@ -28,30 +26,15 @@ func NewDefaultApiService() DefaultApiServicer {
 }
 
 // DeploymentDeploymentIdGet - Get the deployment with id deploymentId
-func (s *DefaultApiService) DeploymentDeploymentIdGet(deploymentId string) (interface{}, error) {
+func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deploymentId string) (interface{}, error) {
 	// TODO - update DeploymentDeploymentIdGet with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 	return nil, errors.New("service method 'DeploymentDeploymentIdGet' not implemented")
 }
 
 // DeploymentPost - Create a new deployment
-func (s *DefaultApiService) DeploymentPost(repository string, email string) (interface{}, error) {
+func (s *DefaultApiService) DeploymentPost(ctx context.Context, email string, repository string) (interface{}, error) {
 	// TODO - update DeploymentPost with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-	err := gitops.PostApplication(repository, email)
-	if err != nil {
-		log.Printf("PostApplication failed: %s", err.Error())
-		return DeploymentAcceptedResponse{
-			Repository: repository,
-			Email:      email,
-			Message:    err.Error(),
-			Result:     "NOK",
-		}, err
-	}
-	return DeploymentAcceptedResponse{
-		Repository: repository,
-		Email:      email,
-		Message:    "OK",
-		Result:     "OK",
-	}, nil
+	return nil, errors.New("service method 'DeploymentPost' not implemented")
 }

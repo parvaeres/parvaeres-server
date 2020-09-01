@@ -9,8 +9,8 @@
 
 package parvaeres
 
-type Deployment struct {
-	Status string `json:"status,omitempty"`
+type CreateDeploymentRequest struct {
+	Email string `json:"Email,omitempty"`
 
-	LiveUrls []string `json:"liveUrls,omitempty"`
+	Repository string `json:"Repository,omitempty"`
 }

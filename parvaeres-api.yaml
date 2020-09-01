@@ -1,3 +1,4 @@
+---
 openapi: 3.0.0
 
 info:
@@ -22,14 +23,14 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/DeploymentForm'
+              $ref: '#/components/schemas/CreateDeploymentRequest'
       responses:
-        '202': #Accepted
+        '202':  # Accepted
           description: Accepted
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DeploymentAcceptedResponse'
+                $ref: '#/components/schemas/CreateDeploymentResponse'
 
   /deployment/{deploymentId}:
     summary: A deployment
@@ -49,39 +50,41 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Deployment'
+                $ref: '#/components/schemas/DeploymentStatus'
 
 components:
   schemas:
-   
-    DeploymentForm:
+    CreateDeploymentRequest:
       type: object
       properties:
-        repository:
+        Email:
           type: string
-        email:
+        Repository:
           type: string
-    
-    DeploymentAcceptedResponse:
+
+    CreateDeploymentResponse:
       type: object
       properties:
-        repository:
+        Message:
           type: string
-        email:
-          type: string
-        message:
-          type: string
-        result:
-          type: string
-    
-    Deployment:
+        Error:
+          type: boolean
+        DeploymentStatus:
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DeploymentStatus'
+
+    DeploymentStatus:
       type: object
       properties:
-        status:
+        Status:
           type: string
-        liveUrls:
+          enum:
+            - PENDING
+            - SYNCING
+            - DEPLOYED
+            - ERROR
+        LiveURLs:
           type: array
           items:
             type: string
-
-
