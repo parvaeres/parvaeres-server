@@ -45,6 +45,14 @@ up() {
         # connect the registry to the cluster's network
         docker network connect "k3d-$K3D_CLUSTER_NAME" registry.localhost
     fi
+
+    # install argocd
+    if ! kubectl get namespace argocd &> /dev/null; then
+        kubectl create namespace argocd
+    fi
+    kubectl apply \
+        -n argocd \
+        -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 }
 
 # cluster and registry down!
