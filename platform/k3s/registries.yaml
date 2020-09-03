@@ -1,0 +1,10 @@
+#
+# k3d/k3s local registry configuration
+#
+# See: https://k3d.io/usage/guides/registries/
+#
+---
+mirrors:
+  "registry.localhost:5000":
+    endpoint:
+      - http://registry.localhost:5000
