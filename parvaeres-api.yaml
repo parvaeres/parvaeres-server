@@ -69,10 +69,12 @@ components:
           type: string
         Error:
           type: boolean
-        DeploymentStatus:
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/DeploymentStatus'
+        Items:
+          type: array
+          items:
+            type: object
+            allOf:
+              - $ref: '#/components/schemas/DeploymentStatus'
 
     DeploymentStatus:
       type: object
@@ -85,6 +87,10 @@ components:
             - DEPLOYED
             - ERROR
         LiveURLs:
+          type: array
+          items:
+            type: string
+        Errors:
           type: array
           items:
             type: string

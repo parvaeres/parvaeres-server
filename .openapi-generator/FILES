@@ -1,6 +1,4 @@
-README.md
 api/openapi.yaml
-main.go
 pkg/api.go
 pkg/api_default.go
 pkg/api_default_service.go

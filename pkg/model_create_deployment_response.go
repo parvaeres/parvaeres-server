@@ -14,5 +14,5 @@ type CreateDeploymentResponse struct {
 
 	Error bool `json:"Error,omitempty"`
 
-	DeploymentStatus DeploymentStatus `json:"DeploymentStatus,omitempty"`
+	Items []DeploymentStatus `json:"Items,omitempty"`
 }

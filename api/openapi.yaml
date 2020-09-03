@@ -60,20 +60,27 @@ components:
       example:
         Message: Message
         Error: true
-        DeploymentStatus: '{}'
+        Items:
+        - '{}'
+        - '{}'
       properties:
         Message:
           type: string
         Error:
           type: boolean
-        DeploymentStatus:
-          allOf:
-          - $ref: '#/components/schemas/DeploymentStatus'
-          type: object
+        Items:
+          items:
+            allOf:
+            - $ref: '#/components/schemas/DeploymentStatus'
+            type: object
+          type: array
       type: object
     DeploymentStatus:
       example:
         Status: PENDING
+        Errors:
+        - Errors
+        - Errors
         LiveURLs:
         - LiveURLs
         - LiveURLs
@@ -86,6 +93,10 @@ components:
           - ERROR
           type: string
         LiveURLs:
+          items:
+            type: string
+          type: array
+        Errors:
           items:
             type: string
           type: array

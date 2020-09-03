@@ -13,4 +13,6 @@ type DeploymentStatus struct {
 	Status string `json:"Status,omitempty"`
 
 	LiveURLs []string `json:"LiveURLs,omitempty"`
+
+	Errors []string `json:"Errors,omitempty"`
 }
