@@ -16,15 +16,14 @@ spec:
         app: parvaeres-server
     spec:
       containers:
-      - image: registry.local:5000/parvaeres:latest
-        imagePullPolicy: Always
-        name: parvaeres
-        ports:
-        - containerPort: 8080
+        - image: registry.localhost:5000/parvaeres:latest
+          imagePullPolicy: Always
+          name: parvaeres
+          ports:
+            - containerPort: 8080
       serviceAccount: argocd-server
       serviceAccountName: argocd-server
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -35,12 +34,10 @@ metadata:
   namespace: argocd
 spec:
   ports:
-  - name: 8080-8080
-    port: 8080
-    protocol: TCP
-    targetPort: 8080
+    - name: api
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
   selector:
     app: parvaeres-server
-  type: ClusterIP
-status:
-  loadBalancer: {}
+  type: LoadBalancer
