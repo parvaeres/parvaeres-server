@@ -8,7 +8,7 @@ import (
 )
 
 //TestApplication tests the application generation
-func TestGenerateApplication(t *testing.T) {
+func TestNewApplication(t *testing.T) {
 	Convey("Given a url and an email", t, func() {
 		inputURL := "http://blabla"
 		inputEmail := "my@email.com"
