@@ -2,4 +2,4 @@
 higeGenerationTimestamp: false
 packageName: parvaeres
 packageVersion: 0.0.1
-sourceFolder: pkg
+sourceFolder: pkg/api
