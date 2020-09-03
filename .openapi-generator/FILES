@@ -6,4 +6,6 @@ pkg/logger.go
 pkg/model_create_deployment_request.go
 pkg/model_create_deployment_response.go
 pkg/model_deployment_status.go
+pkg/model_get_deployment_request.go
+pkg/model_get_deployment_response.go
 pkg/routers.go

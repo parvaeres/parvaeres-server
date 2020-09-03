@@ -10,6 +10,7 @@
 package parvaeres
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -36,6 +37,12 @@ func (c *DefaultApiController) Routes() Routes {
 			c.DeploymentDeploymentIdGet,
 		},
 		{
+			"DeploymentGet",
+			strings.ToUpper("Get"),
+			"/v1/deployment",
+			c.DeploymentGet,
+		},
+		{
 			"DeploymentPost",
 			strings.ToUpper("Post"),
 			"/v1/deployment",
@@ -57,17 +64,32 @@ func (c *DefaultApiController) DeploymentDeploymentIdGet(w http.ResponseWriter, 
 	EncodeJSONResponse(result, nil, w)
 }
 
-// DeploymentPost - Create a new deployment
-func (c *DefaultApiController) DeploymentPost(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+// DeploymentGet - Get all deployments
+func (c *DefaultApiController) DeploymentGet(w http.ResponseWriter, r *http.Request) {
+	getDeploymentRequest := &GetDeploymentRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&getDeploymentRequest); err != nil {
+		w.WriteHeader(500)
+		return
+	}
+
+	result, err := c.service.DeploymentGet(r.Context(), *getDeploymentRequest)
 	if err != nil {
 		w.WriteHeader(500)
 		return
 	}
 
-	email := r.FormValue("email")
-	repository := r.FormValue("repository")
-	result, err := c.service.DeploymentPost(r.Context(), email, repository)
+	EncodeJSONResponse(result, nil, w)
+}
+
+// DeploymentPost - Create a new deployment
+func (c *DefaultApiController) DeploymentPost(w http.ResponseWriter, r *http.Request) {
+	createDeploymentRequest := &CreateDeploymentRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&createDeploymentRequest); err != nil {
+		w.WriteHeader(500)
+		return
+	}
+
+	result, err := c.service.DeploymentPost(r.Context(), *createDeploymentRequest)
 	if err != nil {
 		w.WriteHeader(500)
 		return

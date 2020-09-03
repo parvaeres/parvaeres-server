@@ -9,13 +9,32 @@ servers:
 paths:
   /deployment:
     description: This resource represents the deployments in the system
+    get:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetDeploymentRequest'
+        description: Additional parameters for request
+        required: false
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetDeploymentResponse'
+          description: OK
+      summary: Get all deployments
     post:
       requestBody:
         content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeploymentRequest'
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/CreateDeploymentRequest'
-        description: Repository and email address in an HTML form
+        description: Deployment parameters
         required: true
       responses:
         "202":
@@ -50,6 +69,9 @@ paths:
 components:
   schemas:
     CreateDeploymentRequest:
+      example:
+        Repository: Repository
+        Email: Email
       properties:
         Email:
           type: string
@@ -57,6 +79,35 @@ components:
           type: string
       type: object
     CreateDeploymentResponse:
+      example:
+        Message: Message
+        Error: true
+        Items:
+        - '{}'
+        - '{}'
+      properties:
+        Message:
+          type: string
+        Error:
+          type: boolean
+        Items:
+          items:
+            allOf:
+            - $ref: '#/components/schemas/DeploymentStatus'
+            type: object
+          type: array
+      type: object
+    GetDeploymentRequest:
+      example:
+        Filter: Filter
+        UUID: UUID
+      properties:
+        UUID:
+          type: string
+        Filter:
+          type: string
+      type: object
+    GetDeploymentResponse:
       example:
         Message: Message
         Error: true

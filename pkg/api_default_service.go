@@ -32,8 +32,15 @@ func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deplo
 	return nil, errors.New("service method 'DeploymentDeploymentIdGet' not implemented")
 }
 
+// DeploymentGet - Get all deployments
+func (s *DefaultApiService) DeploymentGet(ctx context.Context, getDeploymentRequest GetDeploymentRequest) (interface{}, error) {
+	// TODO - update DeploymentGet with the required logic for this service method.
+	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	return nil, errors.New("service method 'DeploymentGet' not implemented")
+}
+
 // DeploymentPost - Create a new deployment
-func (s *DefaultApiService) DeploymentPost(ctx context.Context, email string, repository string) (interface{}, error) {
+func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeploymentRequest CreateDeploymentRequest) (interface{}, error) {
 	// TODO - update DeploymentPost with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 	return nil, errors.New("service method 'DeploymentPost' not implemented")

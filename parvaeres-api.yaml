@@ -15,12 +15,33 @@ paths:
   /deployment:
     summary: Deployments
     description: This resource represents the deployments in the system
+
+    get:
+      summary: Get all deployments
+      requestBody:
+        description: Additional parameters for request
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetDeploymentRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetDeploymentResponse'
+
     post:
       summary: Create a new deployment
       requestBody:
-        description: Repository and email address in an HTML form
+        description: Deployment parameters
         required: true
         content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeploymentRequest'
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/CreateDeploymentRequest'
@@ -35,6 +56,7 @@ paths:
   /deployment/{deploymentId}:
     summary: A deployment
     description: This resource represents an individual deployment
+
     get:
       summary: Get the deployment with id deploymentId
       parameters:
@@ -63,6 +85,28 @@ components:
           type: string
 
     CreateDeploymentResponse:
+      type: object
+      properties:
+        Message:
+          type: string
+        Error:
+          type: boolean
+        Items:
+          type: array
+          items:
+            type: object
+            allOf:
+              - $ref: '#/components/schemas/DeploymentStatus'
+
+    GetDeploymentRequest:
+      type: object
+      properties:
+        UUID:
+          type: string
+        Filter:
+          type: string
+
+    GetDeploymentResponse:
       type: object
       properties:
         Message:
