@@ -1,8 +1,8 @@
-package gitops
+package parvaeres
 
 import (
 	"github.com/pkg/errors"
-	parvaeres "github.com/riccardomc/parvaeres/pkg/api"
+	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
 
 /*CreateDeployment is the flow in response to a Deployment creation request
@@ -10,28 +10,24 @@ import (
 * FIXME: currently we use only repoURL and email, but we probably need a more flexible
 * input object
  */
-func CreateDeployment(request parvaeres.CreateDeploymentRequest) error {
+func CreateDeployment(request CreateDeploymentRequest) error {
 	err := ValidateCreateDeploymentRequest(request)
 	if err != nil {
 		return errors.Wrap(err, "CreateDeploymentRequest was invalid")
 	}
-	existingApplications, err := listApplications(request.Email, request.Repository)
+	existingApplications, err := gitops.ListApplications(request.Email, request.Repository)
 	if err != nil {
 		return errors.Wrap(err, "CreateDeployment failed")
 	}
 	if len(existingApplications.Items) > 0 {
 		return errors.Errorf("application exists")
 	}
-	newApplication, err := newApplication(request.Email, request.Repository)
-	if err != nil {
-		return errors.Wrap(err, "CreateDeployment failed")
-	}
-	return createApplication(newApplication)
+	return gitops.CreateApplication(request.Email, request.Repository)
 }
 
 /*ValidateCreateDeploymentRequest FIXME: is not implemented yet
 *
  */
-func ValidateCreateDeploymentRequest(request parvaeres.CreateDeploymentRequest) error {
+func ValidateCreateDeploymentRequest(request CreateDeploymentRequest) error {
 	return nil
 }

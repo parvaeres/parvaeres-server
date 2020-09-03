@@ -12,8 +12,6 @@ package parvaeres
 import (
 	"context"
 	"errors"
-
-	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
 
 // DefaultApiService is a service that implents the logic for the DefaultApiServicer
@@ -43,7 +41,7 @@ func (s *DefaultApiService) DeploymentGet(ctx context.Context, getDeploymentRequ
 
 // DeploymentPost - Create a new deployment
 func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeploymentRequest CreateDeploymentRequest) (interface{}, error) {
-	err := gitops.CreateDeployment(createDeploymentRequest)
+	err := CreateDeployment(createDeploymentRequest)
 	if err != nil {
 		return CreateDeploymentResponse{
 			Error:   true,
