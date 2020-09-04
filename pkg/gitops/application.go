@@ -80,15 +80,10 @@ func getDefaultApplication() *v1alpha1.Application {
 	}
 }
 
-// CreateApplication returns an ArgoCD Application relative to email and repoURL
-func CreateApplication(email string, repoURL string) error {
+func newApplication(email string, repoURL string) (*v1alpha1.Application, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
-		return errors.Wrap(err, "Unable to create application")
-	}
-	client, err := getArgoCDClient()
-	if err != nil {
-		return errors.Wrap(err, "Unable to create application")
+		return nil, errors.Wrap(err, "Unable to create application")
 	}
 
 	newApplication := getDefaultApplication()
@@ -97,9 +92,20 @@ func CreateApplication(email string, repoURL string) error {
 	newApplication.ObjectMeta.Annotations["parvaeres-email"] = email
 	newApplication.ObjectMeta.Annotations["parvaeres-repoURL"] = repoURL
 
-	_, err = client.ArgoprojV1alpha1().Applications(argocdNamespace).Create(newApplication)
+	return newApplication, nil
+}
 
-	return err
+// CreateApplication returns an ArgoCD Application relative to email and repoURL
+func CreateApplication(email string, repoURL string) (*v1alpha1.Application, error) {
+	client, err := getArgoCDClient()
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to create application")
+	}
+	newApplication, err := newApplication(email, repoURL)
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to create application")
+	}
+	return client.ArgoprojV1alpha1().Applications(argocdNamespace).Create(newApplication)
 }
 
 // ListApplications returns a list of ArgoCD applications

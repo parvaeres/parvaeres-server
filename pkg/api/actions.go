@@ -22,7 +22,8 @@ func CreateDeployment(request CreateDeploymentRequest) error {
 	if len(existingApplications.Items) > 0 {
 		return errors.Errorf("application exists")
 	}
-	return gitops.CreateApplication(request.Email, request.Repository)
+	_, err = gitops.CreateApplication(request.Email, request.Repository)
+	return err
 }
 
 /*ValidateCreateDeploymentRequest FIXME: is not implemented yet
