@@ -1,6 +1,7 @@
 package gitops
 
 import (
+	"encoding/hex"
 	"testing"
 
 	"github.com/google/uuid"
@@ -17,8 +18,10 @@ func TestNewApplication(t *testing.T) {
 			Convey("Then the Application fields are populated as expected", func() {
 				So(err, ShouldBeNil)
 				So(newApplication.Spec.Source.RepoURL, ShouldEqual, inputURL)
-				So(newApplication.ObjectMeta.Annotations["parvaeres-email"], ShouldEqual, inputEmail)
-				So(newApplication.ObjectMeta.Annotations["parvaeres-repoURL"], ShouldEqual, inputURL)
+				So(newApplication.ObjectMeta.Annotations["parvaeres.io/email"], ShouldEqual, inputEmail)
+				So(newApplication.ObjectMeta.Annotations["parvaeres.io/repoURL"], ShouldEqual, inputURL)
+				So(newApplication.ObjectMeta.Labels["parvaeres.io/email"], ShouldEqual, hex.EncodeToString([]byte(inputEmail)))
+				So(newApplication.ObjectMeta.Labels["parvaeres.io/repoURL"], ShouldEqual, hex.EncodeToString([]byte(inputURL)))
 				Convey("And the name field is a UUID", func() {
 					uuid, err := uuid.Parse(newApplication.ObjectMeta.Name)
 					So(err, ShouldBeNil)

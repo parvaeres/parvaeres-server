@@ -1,6 +1,7 @@
 package gitops
 
 import (
+	"encoding/hex"
 	"fmt"
 	"log"
 
@@ -50,8 +51,12 @@ func getDefaultApplication() *v1alpha1.Application {
 			Name:      "defaultApplication",
 			Namespace: argocdNamespace,
 			Annotations: map[string]string{
-				"parvaeres-email":   "",
-				"parvaeres-repoURL": "",
+				"parvaeres.io/email":   "",
+				"parvaeres.io/repoURL": "",
+			},
+			Labels: map[string]string{
+				"parvaeres.io/email":   "",
+				"parvaeres.io/repoURL": "",
 			},
 		},
 		TypeMeta: metav1.TypeMeta{
@@ -89,8 +94,17 @@ func newApplication(email string, repoURL string) (*v1alpha1.Application, error)
 	newApplication := getDefaultApplication()
 	newApplication.Spec.Source.RepoURL = repoURL
 	newApplication.ObjectMeta.Name = id.String()
-	newApplication.ObjectMeta.Annotations["parvaeres-email"] = email
-	newApplication.ObjectMeta.Annotations["parvaeres-repoURL"] = repoURL
+	/* Labels have a limited allowed character set, so we encode the data in hex
+	* maybe there's a more efficient encoding. Labels are useful for search/watch operations.
+	* I prefer using hex instead of invertible hashing so data can be retrieved.
+	* However, to keep the information human readable we also set annotations.
+	*
+	* FIXME: figure out if there's a better encoding for this.
+	 */
+	newApplication.ObjectMeta.Labels["parvaeres.io/email"] = hex.EncodeToString([]byte(email))
+	newApplication.ObjectMeta.Labels["parvaeres.io/repoURL"] = hex.EncodeToString([]byte(repoURL))
+	newApplication.ObjectMeta.Annotations["parvaeres.io/email"] = email
+	newApplication.ObjectMeta.Annotations["parvaeres.io/repoURL"] = repoURL
 
 	return newApplication, nil
 }
@@ -115,7 +129,9 @@ func ListApplications(email string, repoURL string) (*v1alpha1.ApplicationList, 
 		return nil, errors.Wrap(err, "Unable to list Applications")
 	}
 
-	selector := fmt.Sprintf("parvaeres-email=%s, parvaeres-repoURL=%s", email, repoURL)
+	// See comment in newApplication
+	selector := fmt.Sprintf("parvaeres.io/email=%s, parvaeres.io/repoURL=%s",
+		hex.EncodeToString([]byte(email)), hex.EncodeToString([]byte(repoURL)))
 
 	apps, err := client.ArgoprojV1alpha1().Applications(argocdNamespace).List(
 		metav1.ListOptions{
