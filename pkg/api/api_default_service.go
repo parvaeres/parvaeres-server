@@ -12,6 +12,7 @@ package parvaeres
 import (
 	"context"
 	"errors"
+	"log"
 )
 
 // DefaultApiService is a service that implents the logic for the DefaultApiServicer
@@ -27,7 +28,10 @@ func NewDefaultApiService() DefaultApiServicer {
 
 // DeploymentDeploymentIdGet - Get the deployment with id deploymentId
 func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deploymentId string) (interface{}, error) {
-	return GetDeploymentByID(deploymentId)
+	log.Printf("DeploymentDeploymentIdGet: %v", deploymentId)
+	response, err := GetDeploymentByID(deploymentId)
+	log.Printf("DeploymentDeploymentIdGet: %v\nError: %v", response, err)
+	return response, nil
 }
 
 // DeploymentGet - Get all deployments
@@ -39,5 +43,8 @@ func (s *DefaultApiService) DeploymentGet(ctx context.Context, getDeploymentRequ
 
 // DeploymentPost - Create a new deployment
 func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeploymentRequest CreateDeploymentRequest) (interface{}, error) {
-	return CreateDeployment(createDeploymentRequest)
+	log.Printf("DeploymentPost: %v", createDeploymentRequest)
+	response, err := CreateDeployment(createDeploymentRequest)
+	log.Printf("DeploymentPost: %v\nError: %v", response, err)
+	return response, nil
 }
