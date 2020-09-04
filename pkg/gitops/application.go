@@ -66,7 +66,7 @@ func getDefaultApplication() *v1alpha1.Application {
 		Spec: v1alpha1.ApplicationSpec{
 			Project: "default",
 			Source: v1alpha1.ApplicationSource{
-				Path:           "",
+				Path:           "/",
 				TargetRevision: "HEAD",
 				RepoURL:        "",
 			},
