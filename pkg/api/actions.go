@@ -23,7 +23,7 @@ func CreateDeployment(request CreateDeploymentRequest) (*CreateDeploymentRespons
 		}, err
 	}
 
-	existingApplications, err := gitops.ListApplications(request.Email, request.Repository)
+	existingApplications, err := gitops.ListApplications(request.Email, request.Repository, request.Path)
 	if err != nil {
 		err = errors.Wrap(err, "CreateDeployment failed")
 		return &CreateDeploymentResponse{
@@ -41,7 +41,7 @@ func CreateDeployment(request CreateDeploymentRequest) (*CreateDeploymentRespons
 		}, err
 	}
 
-	application, err := gitops.CreateApplication(request.Email, request.Repository)
+	application, err := gitops.CreateApplication(request.Email, request.Repository, request.Path)
 	if err != nil {
 		err = errors.Wrap(err, "CreateDeployment failed")
 		return &CreateDeploymentResponse{

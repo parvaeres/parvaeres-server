@@ -13,4 +13,6 @@ type CreateDeploymentRequest struct {
 	Email string `json:"Email,omitempty"`
 
 	Repository string `json:"Repository,omitempty"`
+
+	Path string `json:"Path,omitempty"`
 }

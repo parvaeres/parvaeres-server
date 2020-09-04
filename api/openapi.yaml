@@ -70,12 +70,15 @@ components:
   schemas:
     CreateDeploymentRequest:
       example:
+        Path: Path
         Repository: Repository
         Email: Email
       properties:
         Email:
           type: string
         Repository:
+          type: string
+        Path:
           type: string
       type: object
     CreateDeploymentResponse:
