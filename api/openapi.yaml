@@ -135,7 +135,10 @@ components:
         LiveURLs:
         - LiveURLs
         - LiveURLs
+        UUID: UUID
       properties:
+        UUID:
+          type: string
         Status:
           enum:
           - PENDING

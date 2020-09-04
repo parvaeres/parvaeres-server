@@ -27,9 +27,7 @@ func NewDefaultApiService() DefaultApiServicer {
 
 // DeploymentDeploymentIdGet - Get the deployment with id deploymentId
 func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deploymentId string) (interface{}, error) {
-	// TODO - update DeploymentDeploymentIdGet with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-	return nil, errors.New("service method 'DeploymentDeploymentIdGet' not implemented")
+	return GetDeploymentByID(deploymentId)
 }
 
 // DeploymentGet - Get all deployments
@@ -41,17 +39,5 @@ func (s *DefaultApiService) DeploymentGet(ctx context.Context, getDeploymentRequ
 
 // DeploymentPost - Create a new deployment
 func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeploymentRequest CreateDeploymentRequest) (interface{}, error) {
-	err := CreateDeployment(createDeploymentRequest)
-	if err != nil {
-		return CreateDeploymentResponse{
-			Error:   true,
-			Message: err.Error(),
-			Items:   []DeploymentStatus{},
-		}, err
-	}
-	return CreateDeploymentResponse{
-		Error:   false,
-		Message: "Yo!",
-		Items:   []DeploymentStatus{},
-	}, nil
+	return CreateDeployment(createDeploymentRequest)
 }

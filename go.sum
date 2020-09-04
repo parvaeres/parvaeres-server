@@ -52,6 +52,7 @@ github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239 h1:kFOfPq6dUM1hTo
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
 github.com/argoproj/argo-cd v1.6.1 h1:xluKFCEBxzAkYzUHrqjYF3LPnityAzVQ9Qy9n1oChO8=
 github.com/argoproj/argo-cd v1.6.1/go.mod h1:qRyKHxh5BLUVheMoMU0uq1/wwRMgmbpEGc8Csd61MRI=
+github.com/argoproj/argo-cd v1.7.3 h1:1CyonIZNXrE3PXUtn5TJMTdKlDdvuD/4lKD392iSoBM=
 github.com/argoproj/gitops-engine v0.1.2 h1:tUDt0DR3axmHLmEJwgqWnr+cHHSK6cJLJef3YTLkQ+E=
 github.com/argoproj/gitops-engine v0.1.2/go.mod h1:UmBGlQLT/MPNiMmbnouZRWhkk3slPuozMsENdXMkIMs=
 github.com/argoproj/pkg v0.0.0-20200102163130-2dd1f3f6b4de/go.mod h1:2EZ44RG/CcgtPTwrRR0apOc7oU6UIw8GjCUJWZ8X3bM=

@@ -1,7 +1,6 @@
 api/openapi.yaml
 pkg/api/api.go
 pkg/api/api_default.go
-pkg/api/api_default_service.go
 pkg/api/logger.go
 pkg/api/model_create_deployment_request.go
 pkg/api/model_create_deployment_response.go

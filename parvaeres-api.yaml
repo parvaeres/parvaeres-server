@@ -123,6 +123,8 @@ components:
     DeploymentStatus:
       type: object
       properties:
+        UUID:
+          type: string
         Status:
           type: string
           enum:

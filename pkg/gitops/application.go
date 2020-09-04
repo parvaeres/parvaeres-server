@@ -124,3 +124,29 @@ func ListApplications(email string, repoURL string) (*v1alpha1.ApplicationList, 
 
 	return apps, errors.Wrap(err, "Unable to list applications")
 }
+
+//GetApplicationByName returns an ArgoCD application with the corresponding name
+func GetApplicationByName(name string) (*v1alpha1.Application, error) {
+	client, err := getArgoCDClient()
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to get Application")
+	}
+
+	selector := fmt.Sprintf("metadata.name=%s", name)
+
+	apps, err := client.ArgoprojV1alpha1().Applications(argocdNamespace).List(
+		metav1.ListOptions{
+			FieldSelector: selector,
+		})
+
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to get Application")
+	}
+
+	if len(apps.Items) > 0 {
+		return &apps.Items[0], nil
+	}
+
+	// return nothing without error if the application is not found
+	return nil, fmt.Errorf("Application not found")
+}

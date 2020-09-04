@@ -27,3 +27,4 @@ Dockerfile
 README.md
 main.go
 .gitignore
+pkg/api/api_default_service.go
