@@ -128,12 +128,7 @@ components:
         UUID:
           type: string
         Status:
-          type: string
-          enum:
-            - PENDING
-            - SYNCING
-            - DEPLOYED
-            - ERROR
+          $ref: "#/components/schemas/DeploymentStatusType"
         LiveURLs:
           type: array
           items:
@@ -142,3 +137,12 @@ components:
           type: array
           items:
             type: string
+
+    DeploymentStatusType:
+      type: string
+      enum:
+        - PENDING
+        - SYNCING
+        - DEPLOYED
+        - ERROR
+

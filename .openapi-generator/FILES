@@ -5,6 +5,7 @@ pkg/api/logger.go
 pkg/api/model_create_deployment_request.go
 pkg/api/model_create_deployment_response.go
 pkg/api/model_deployment_status.go
+pkg/api/model_deployment_status_type.go
 pkg/api/model_get_deployment_request.go
 pkg/api/model_get_deployment_response.go
 pkg/api/routers.go

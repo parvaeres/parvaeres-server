@@ -12,7 +12,7 @@ package parvaeres
 type DeploymentStatus struct {
 	UUID string `json:"UUID,omitempty"`
 
-	Status string `json:"Status,omitempty"`
+	Status DeploymentStatusType `json:"Status,omitempty"`
 
 	LiveURLs []string `json:"LiveURLs,omitempty"`
 

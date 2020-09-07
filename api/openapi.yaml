@@ -131,7 +131,6 @@ components:
       type: object
     DeploymentStatus:
       example:
-        Status: PENDING
         Errors:
         - Errors
         - Errors
@@ -143,12 +142,7 @@ components:
         UUID:
           type: string
         Status:
-          enum:
-          - PENDING
-          - SYNCING
-          - DEPLOYED
-          - ERROR
-          type: string
+          $ref: '#/components/schemas/DeploymentStatusType'
         LiveURLs:
           items:
             type: string
@@ -158,3 +152,10 @@ components:
             type: string
           type: array
       type: object
+    DeploymentStatusType:
+      enum:
+      - PENDING
+      - SYNCING
+      - DEPLOYED
+      - ERROR
+      type: string
