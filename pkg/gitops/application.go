@@ -1,6 +1,7 @@
 package gitops
 
 import (
+	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 	"log"
@@ -85,6 +86,12 @@ func getDefaultApplication() *v1alpha1.Application {
 	}
 }
 
+func sha1String(s string) string {
+	h := sha1.New()
+	h.Write([]byte(s))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
 func newApplication(email, repoURL, path string) (*v1alpha1.Application, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
@@ -100,15 +107,14 @@ func newApplication(email, repoURL, path string) (*v1alpha1.Application, error) 
 
 	/* Here we set a few labels to be able to search/watch based on them.
 	*
-	* Labels have a limited allowed character set, so we encode the data in hex
-	* I prefer using hex instead of invertible hashing so data can be easily understood.
+	* Labels have a limited allowed character set and length, so we use sha1.
 	* However, to keep the information immediately human readable we also set annotations.
 	*
 	* FIXME: figure out if there's a better encoding for this.
 	 */
-	newApplication.ObjectMeta.Labels["parvaeres.io/email"] = hex.EncodeToString([]byte(email))
-	newApplication.ObjectMeta.Labels["parvaeres.io/repoURL"] = hex.EncodeToString([]byte(repoURL))
-	newApplication.ObjectMeta.Labels["parvaeres.io/path"] = hex.EncodeToString([]byte(path))
+	newApplication.ObjectMeta.Labels["parvaeres.io/email"] = sha1String(email)
+	newApplication.ObjectMeta.Labels["parvaeres.io/repoURL"] = sha1String(repoURL)
+	newApplication.ObjectMeta.Labels["parvaeres.io/path"] = sha1String(path)
 	newApplication.ObjectMeta.Annotations["parvaeres.io/email"] = email
 	newApplication.ObjectMeta.Annotations["parvaeres.io/repoURL"] = repoURL
 	newApplication.ObjectMeta.Annotations["parvaeres.io/path"] = path
@@ -116,7 +122,7 @@ func newApplication(email, repoURL, path string) (*v1alpha1.Application, error) 
 	return newApplication, nil
 }
 
-// CreateApplication returns an ArgoCD Application relative to email and repoURL
+// CreateApplication returns an ArgoCD Application relative to email, repoURL and path
 func CreateApplication(email, repoURL, path string) (*v1alpha1.Application, error) {
 	client, err := getArgoCDClient()
 	if err != nil {
@@ -138,7 +144,7 @@ func ListApplications(email, repoURL, path string) (*v1alpha1.ApplicationList, e
 
 	// See comment in newApplication
 	selector := fmt.Sprintf("parvaeres.io/email=%s, parvaeres.io/repoURL=%s, parvaeres.io/path=%s",
-		hex.EncodeToString([]byte(email)), hex.EncodeToString([]byte(repoURL)), hex.EncodeToString([]byte(path)))
+		sha1String(email), sha1String(repoURL), sha1String(path))
 
 	apps, err := client.ArgoprojV1alpha1().Applications(argocdNamespace).List(
 		metav1.ListOptions{
