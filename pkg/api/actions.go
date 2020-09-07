@@ -6,7 +6,10 @@ package parvaeres
  */
 
 import (
+	"reflect"
+
 	"github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
+	"github.com/argoproj/gitops-engine/pkg/health"
 	"github.com/pkg/errors"
 	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
@@ -108,9 +111,58 @@ func GetDeploymentStatusOfApplication(application *v1alpha1.Application) (*Deplo
 		UUID:     application.GetName(),
 		LiveURLs: []string{},
 		Errors:   []string{},
-		Status:   "PENDING",
+		Status:   getDeploymentStatusTypeOfApplication(application),
 	}
 	return deploymentStatus, nil
+}
+
+func applicationHasErrorConditions(application *v1alpha1.Application) bool {
+	for _, c := range application.Status.Conditions {
+		if c.IsError() {
+			return true
+		}
+	}
+	return false
+}
+
+func getDeploymentStatusTypeOfApplication(application *v1alpha1.Application) DeploymentStatusType {
+	// UNKOWN = we don't know much about the application, like when is nil
+	if application == nil {
+		return UNKNOWN
+	}
+
+	// If Application has a Status it might be DEPLOYED or in ERROR status
+	if !reflect.DeepEqual(application.Status, v1alpha1.ApplicationStatus{}) {
+
+		// DEPLOYED: status is Healty and Synced
+		if application.Status.Health.Status == health.HealthStatusHealthy ||
+			application.Status.Sync.Status == v1alpha1.SyncStatusCodeSynced {
+			return DEPLOYED
+		}
+
+		// ERROR: status not Healthy
+		if application.Status.Health.Status == health.HealthStatusDegraded ||
+			application.Status.Health.Status == health.HealthStatusUnknown ||
+			application.Status.Health.Status == health.HealthStatusSuspended ||
+			application.Status.Health.Status == health.HealthStatusMissing ||
+			applicationHasErrorConditions(application) {
+			return ERROR
+		}
+	}
+
+	// PENDING: if an application is not DEPLOYED or not ERROR
+	// then, if it has no SyncPolicy it must be PENDING, i.e. needs user confirmation
+	if reflect.DeepEqual(application.Spec.SyncPolicy, &v1alpha1.SyncPolicy{}) {
+		return PENDING
+	}
+
+	// SYNCING: an application has been confirmed by the user and has a SyncPolicy
+	if reflect.DeepEqual(application.Spec.SyncPolicy.Automated,
+		&v1alpha1.SyncPolicyAutomated{Prune: true, SelfHeal: true}) {
+		return SYNCING
+	}
+
+	return UNKNOWN
 }
 
 //GetDeploymentByIDRequestValidate FIXME: is not implemented yet

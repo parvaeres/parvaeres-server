@@ -14,7 +14,7 @@ func TestNewApplication(t *testing.T) {
 		inputEmail := "my@email.com"
 		inputPath := "/"
 		Convey("When creating an Application", func() {
-			newApplication, err := newApplication(inputEmail, inputURL, inputPath)
+			newApplication, err := NewApplication(inputEmail, inputURL, inputPath)
 			Convey("Then the Application fields are populated as expected", func() {
 				So(err, ShouldBeNil)
 				So(newApplication.Spec.Source.RepoURL, ShouldEqual, inputURL)

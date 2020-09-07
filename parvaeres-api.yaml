@@ -145,4 +145,4 @@ components:
         - SYNCING
         - DEPLOYED
         - ERROR
-
+        - UNKNOWN

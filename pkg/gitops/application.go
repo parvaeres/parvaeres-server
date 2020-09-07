@@ -75,13 +75,16 @@ func getDefaultApplication() *v1alpha1.Application {
 				Namespace: "default",
 				Server:    "https://kubernetes.default.svc",
 			},
-			SyncPolicy: &v1alpha1.SyncPolicy{
-				Automated: &v1alpha1.SyncPolicyAutomated{
-					Prune:    true,
-					SelfHeal: true,
+			SyncPolicy: &v1alpha1.SyncPolicy{},
+			/*
+				SyncPolicy: &v1alpha1.SyncPolicy{
+					Automated: &v1alpha1.SyncPolicyAutomated{
+						Prune:    true,
+						SelfHeal: true,
+					},
+					SyncOptions: v1alpha1.SyncOptions{},
 				},
-				SyncOptions: v1alpha1.SyncOptions{},
-			},
+			*/
 		},
 	}
 }
@@ -92,7 +95,8 @@ func sha1String(s string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func newApplication(email, repoURL, path string) (*v1alpha1.Application, error) {
+//NewApplication returns an application with fields based on input parameters
+func NewApplication(email, repoURL, path string) (*v1alpha1.Application, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to create application")
@@ -128,7 +132,7 @@ func CreateApplication(email, repoURL, path string) (*v1alpha1.Application, erro
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to create application")
 	}
-	newApplication, err := newApplication(email, repoURL, path)
+	newApplication, err := NewApplication(email, repoURL, path)
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to create application")
 	}

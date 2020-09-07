@@ -158,4 +158,5 @@ components:
       - SYNCING
       - DEPLOYED
       - ERROR
+      - UNKNOWN
       type: string

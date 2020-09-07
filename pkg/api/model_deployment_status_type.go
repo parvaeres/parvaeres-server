@@ -17,4 +17,5 @@ const (
 	SYNCING  DeploymentStatusType = "SYNCING"
 	DEPLOYED DeploymentStatusType = "DEPLOYED"
 	ERROR    DeploymentStatusType = "ERROR"
+	UNKNOWN  DeploymentStatusType = "UNKNOWN"
 )
