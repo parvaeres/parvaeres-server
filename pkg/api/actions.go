@@ -72,37 +72,58 @@ func CreateDeploymentRequestValidate(request CreateDeploymentRequest) error {
 }
 
 //GetDeploymentByID returns a list of deployments based on the request
-func GetDeploymentByID(deploymentID string) (*GetDeploymentResponse, error) {
-	err := GetDeploymentByIDRequestValidate(deploymentID)
+func GetDeploymentByID(deploymentID string) (status *GetDeploymentResponse, err error) {
+	status = &GetDeploymentResponse{
+		Error:   true,
+		Message: "",
+		Items:   []DeploymentStatus{},
+	}
+
+	err = GetDeploymentByIDRequestValidate(deploymentID)
 	if err != nil {
 		err = errors.Wrap(err, "GetDeploymentRequest is invalid")
-		return &GetDeploymentResponse{
-			Error:   true,
-			Message: err.Error(),
-			Items:   []DeploymentStatus{},
-		}, err
+		status.Error = true
+		status.Message = err.Error()
+		return
 	}
 
 	application, err := gitops.GetApplicationByName(deploymentID)
 	if err != nil {
-		err = errors.Wrap(err, "GetDeployment failed")
-		return &GetDeploymentResponse{
-			Error:   true,
-			Message: err.Error(),
-			Items:   []DeploymentStatus{},
-		}, err
+		err = errors.Wrap(err, "GetDeployment failed, deployment not found")
+		status.Error = true
+		status.Message = err.Error()
+		return
 	}
 
-	status, err := GetDeploymentStatusOfApplication(application)
+	deploymentStatus, err := GetDeploymentStatusOfApplication(application)
 	if err != nil {
-		//FIXME: handle cannot get status: the app is created but status cannot be retrieved
+		err = errors.Wrap(err, "GetDeployment deployment created but cannot get status")
+		status.Error = true
+		status.Message = err.Error()
+		return
 	}
 
-	return &GetDeploymentResponse{
-		Error:   false,
-		Message: "CREATED",
-		Items:   []DeploymentStatus{*status},
-	}, nil
+	err = EnableDeployment(deploymentID)
+	if err != nil {
+		err = errors.Wrap(err, "GetDeployment EnableDeployment failed")
+		status.Error = true
+		status.Message = err.Error()
+		return
+	}
+
+	deploymentStatus, err = GetDeploymentStatusOfApplication(application)
+	if err != nil {
+		err = errors.Wrap(err, "GetDeployment deployment created but cannot get status")
+		status.Error = true
+		status.Message = err.Error()
+		return
+	}
+
+	status.Error = false
+	status.Message = "FOUND"
+	status.Items = []DeploymentStatus{*deploymentStatus}
+	err = nil
+	return
 }
 
 //GetDeploymentStatusOfApplication returns the DeploymentStatus corresponding to the application
@@ -131,6 +152,12 @@ func getDeploymentStatusTypeOfApplication(application *v1alpha1.Application) Dep
 		return UNKNOWN
 	}
 
+	// PENDING: if an application is not DEPLOYED or not ERROR
+	// then, if it has no SyncPolicy it must be PENDING, i.e. needs user confirmation
+	if reflect.DeepEqual(application.Spec.SyncPolicy, &v1alpha1.SyncPolicy{}) {
+		return PENDING
+	}
+
 	// If Application has a Status it might be DEPLOYED or in ERROR status
 	if !reflect.DeepEqual(application.Status, v1alpha1.ApplicationStatus{}) {
 
@@ -150,12 +177,6 @@ func getDeploymentStatusTypeOfApplication(application *v1alpha1.Application) Dep
 		}
 	}
 
-	// PENDING: if an application is not DEPLOYED or not ERROR
-	// then, if it has no SyncPolicy it must be PENDING, i.e. needs user confirmation
-	if reflect.DeepEqual(application.Spec.SyncPolicy, &v1alpha1.SyncPolicy{}) {
-		return PENDING
-	}
-
 	// SYNCING: an application has been confirmed by the user and has a SyncPolicy
 	if reflect.DeepEqual(application.Spec.SyncPolicy.Automated,
 		&v1alpha1.SyncPolicyAutomated{Prune: true, SelfHeal: true}) {
@@ -163,6 +184,19 @@ func getDeploymentStatusTypeOfApplication(application *v1alpha1.Application) Dep
 	}
 
 	return UNKNOWN
+}
+
+//EnableDeployment confirms the deployment to be deployed
+func EnableDeployment(deploymentID string) error {
+	application, err := gitops.GetApplicationByName(deploymentID)
+	if err != nil {
+		return err
+	}
+	currentStatus := getDeploymentStatusTypeOfApplication(application)
+	if currentStatus == PENDING {
+		return gitops.SetApplicationAutomatedSyncPolicy(application)
+	}
+	return nil
 }
 
 //GetDeploymentByIDRequestValidate FIXME: is not implemented yet

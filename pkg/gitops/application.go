@@ -173,6 +173,23 @@ func CreateApplication(email, repoURL, path string) (*v1alpha1.Application, erro
 	return client.ArgoprojV1alpha1().Applications(argocdNamespace).Create(newApplication)
 }
 
+//SetApplicationAutomatedSyncPolicy sets the sync policy for the application to Automated
+func SetApplicationAutomatedSyncPolicy(application *v1alpha1.Application) error {
+	client, err := getArgoCDClient()
+	if err != nil {
+		return errors.Wrap(err, "Unable to update application")
+	}
+	application.Spec.SyncPolicy = &v1alpha1.SyncPolicy{
+		Automated: &v1alpha1.SyncPolicyAutomated{
+			Prune:    true,
+			SelfHeal: true,
+		},
+		SyncOptions: v1alpha1.SyncOptions{},
+	}
+	_, err = client.ArgoprojV1alpha1().Applications(argocdNamespace).Update(application)
+	return err
+}
+
 // ListApplications returns a list of ArgoCD applications
 func ListApplications(email, repoURL, path string) (*v1alpha1.ApplicationList, error) {
 	client, err := getArgoCDClient()
