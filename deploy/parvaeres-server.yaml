@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,8 +22,8 @@ spec:
           name: parvaeres
           ports:
             - containerPort: 8080
-      serviceAccount: argocd-server
-      serviceAccountName: argocd-server
+      serviceAccount: parvaeres-server
+      serviceAccountName: parvaeres-server
 ---
 apiVersion: v1
 kind: Service
@@ -41,3 +42,71 @@ spec:
   selector:
     app: parvaeres-server
   type: LoadBalancer
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: parvaeres-server
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+      - configmaps
+      - namespaces
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - applications
+      - appprojects
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - delete
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - list
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: parvaeres-server
+  namespace: argocd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: parvaeres-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: parvaeres-server
+subjects:
+  - kind: ServiceAccount
+    name: parvaeres-server
+    namespace: argocd

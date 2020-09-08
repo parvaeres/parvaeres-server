@@ -11,7 +11,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -28,22 +30,49 @@ func init() {
 }
 */
 
-func getArgoCDClient() (*argoclient.Clientset, error) {
-	var config *rest.Config
-	var err error
-
+func getKubernetesConfig() (*rest.Config, error) {
 	if kubeconfig == "" {
 		log.Printf("using in-cluster configuration")
-		config, err = rest.InClusterConfig()
-	} else {
-		log.Printf("using configuration from '%s'", kubeconfig)
-		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+		return rest.InClusterConfig()
 	}
+	log.Printf("using configuration from '%s'", kubeconfig)
+	return clientcmd.BuildConfigFromFlags("", kubeconfig)
+}
+
+func getArgoCDClient() (*argoclient.Clientset, error) {
+	config, err := getKubernetesConfig()
 	if err != nil {
 		return nil, err
 	}
-
 	return argoclient.NewForConfig(config)
+}
+
+func createNamespace(name string) error {
+	config, err := getKubernetesConfig()
+	if err != nil {
+		return err
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return err
+	}
+
+	// check if namespace already exists, if true exit return without errors
+	namespaces, err := clientset.CoreV1().Namespaces().List(metav1.ListOptions{
+		FieldSelector: fmt.Sprintf("metadata.name=%s", name),
+	})
+	if err != nil {
+		return err
+	}
+	if len(namespaces.Items) > 0 {
+		return nil
+	}
+
+	namespaceSpec := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: name}}
+	_, err = clientset.CoreV1().Namespaces().Create(namespaceSpec)
+
+	return err
 }
 
 func getDefaultApplication() *v1alpha1.Application {
@@ -107,6 +136,7 @@ func NewApplication(email, repoURL, path string) (*v1alpha1.Application, error) 
 	newApplication := getDefaultApplication()
 	newApplication.Spec.Source.RepoURL = repoURL
 	newApplication.Spec.Source.Path = path
+	newApplication.Spec.Destination.Namespace = id.String()
 	newApplication.ObjectMeta.Name = id.String()
 
 	/* Here we set a few labels to be able to search/watch based on them.
@@ -133,6 +163,10 @@ func CreateApplication(email, repoURL, path string) (*v1alpha1.Application, erro
 		return nil, errors.Wrap(err, "Unable to create application")
 	}
 	newApplication, err := NewApplication(email, repoURL, path)
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to create application")
+	}
+	err = createNamespace(newApplication.GetObjectMeta().GetName())
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to create application")
 	}
