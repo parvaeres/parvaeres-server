@@ -13,13 +13,30 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/pkg/errors"
 	parvaeres "github.com/riccardomc/parvaeres/pkg/api"
+	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
 
 func main() {
 	log.Printf("Server started")
 
-	DefaultApiService := parvaeres.NewDefaultApiService()
+	kubernetesConfig, err := gitops.GetKubernetesConfig("")
+	if err != nil {
+		log.Fatalf(errors.Wrap(err, "Couldn't get kubernetes config. Bailing out.").Error())
+	}
+	kubernetesClient, err := gitops.GetKubernetesClientSet(kubernetesConfig)
+	if err != nil {
+		log.Fatalf(errors.Wrap(err, "Couldn't get kubernetes client. Bailing out.").Error())
+	}
+	argoCDClient, err := gitops.GetArgoCDClientSet(kubernetesConfig)
+	if err != nil {
+		log.Fatalf(errors.Wrap(err, "Couldn't get ArgoCD client. Bailing out.").Error())
+	}
+
+	DefaultApiService := &parvaeres.DefaultApiService{
+		Gitops: gitops.NewGitOpsClient().WithKubernetesClient(kubernetesClient).WithArgoCDClient(argoCDClient),
+	}
 	DefaultApiController := parvaeres.NewDefaultApiController(DefaultApiService)
 
 	router := parvaeres.NewRouter(DefaultApiController)

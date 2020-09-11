@@ -15,7 +15,7 @@ import (
 )
 
 //CreateDeployment is the flow in response to a Deployment creation request
-func CreateDeployment(request CreateDeploymentRequest) (*CreateDeploymentResponse, error) {
+func CreateDeployment(request CreateDeploymentRequest, gitops *gitops.GitOpsClient) (*CreateDeploymentResponse, error) {
 	err := CreateDeploymentRequestValidate(request)
 	if err != nil {
 		err = errors.Wrap(err, "CreateDeploymentRequest is invalid")
@@ -72,7 +72,7 @@ func CreateDeploymentRequestValidate(request CreateDeploymentRequest) error {
 }
 
 //GetDeploymentByID returns a list of deployments based on the request
-func GetDeploymentByID(deploymentID string) (status *GetDeploymentResponse, err error) {
+func GetDeploymentByID(deploymentID string, gitops *gitops.GitOpsClient) (status *GetDeploymentResponse, err error) {
 	status = &GetDeploymentResponse{
 		Error:   true,
 		Message: "",
@@ -103,7 +103,7 @@ func GetDeploymentByID(deploymentID string) (status *GetDeploymentResponse, err 
 		return
 	}
 
-	err = EnableDeployment(deploymentID)
+	err = EnableDeployment(deploymentID, gitops)
 	if err != nil {
 		err = errors.Wrap(err, "GetDeployment EnableDeployment failed")
 		status.Error = true
@@ -187,7 +187,7 @@ func getDeploymentStatusTypeOfApplication(application *v1alpha1.Application) Dep
 }
 
 //EnableDeployment confirms the deployment to be deployed
-func EnableDeployment(deploymentID string) error {
+func EnableDeployment(deploymentID string, gitops *gitops.GitOpsClient) error {
 	application, err := gitops.GetApplicationByName(deploymentID)
 	if err != nil {
 		return err

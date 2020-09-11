@@ -13,12 +13,15 @@ import (
 	"context"
 	"errors"
 	"log"
+
+	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
 
 // DefaultApiService is a service that implents the logic for the DefaultApiServicer
 // This service should implement the business logic for every endpoint for the DefaultApi API.
 // Include any external packages or services that will be required by this service.
 type DefaultApiService struct {
+	Gitops *gitops.GitOpsClient
 }
 
 // NewDefaultApiService creates a default api service
@@ -29,8 +32,8 @@ func NewDefaultApiService() DefaultApiServicer {
 // DeploymentDeploymentIdGet - Get the deployment with id deploymentId
 func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deploymentId string) (interface{}, error) {
 	log.Printf("DeploymentDeploymentIdGet: %v", deploymentId)
-	response, err := GetDeploymentByID(deploymentId)
-	log.Printf("DeploymentDeploymentIdGet: %v\nError: %v", response, err)
+	response, _ := GetDeploymentByID(deploymentId, s.Gitops)
+	log.Printf("DeploymentDeploymentIdGet: %v", response)
 	return response, nil
 }
 
@@ -44,7 +47,7 @@ func (s *DefaultApiService) DeploymentGet(ctx context.Context, getDeploymentRequ
 // DeploymentPost - Create a new deployment
 func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeploymentRequest CreateDeploymentRequest) (interface{}, error) {
 	log.Printf("DeploymentPost: %v", createDeploymentRequest)
-	response, err := CreateDeployment(createDeploymentRequest)
-	log.Printf("DeploymentPost: %v\nError: %v", response, err)
+	response, _ := CreateDeployment(createDeploymentRequest, s.Gitops)
+	log.Printf("DeploymentPost: %v", response)
 	return response, nil
 }
