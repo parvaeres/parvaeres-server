@@ -1,10 +1,13 @@
 package gitops
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
 	. "github.com/smartystreets/goconvey/convey"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	testclient "k8s.io/client-go/kubernetes/fake"
 )
 
 //TestApplication tests the application generation
@@ -35,13 +38,18 @@ func TestNewApplication(t *testing.T) {
 
 }
 
-func TestGetArgoCDClient(t *testing.T) {
-	Convey("When trying to get a client outside the cluster", t, func() {
-		clientset, err := getArgoCDClient()
-		Convey("Then it fails", func() {
-			So(err, ShouldNotBeNil)
-			So(clientset, ShouldBeNil)
-			So(err.Error(), ShouldStartWith, "unable to load in-cluster configuration")
+func TestCreateNamespace(t *testing.T) {
+	expectedName := "myNamespace"
+	Convey("Given a GitOpsClient", t, func() {
+		c := NewGitOpsClient().WithKubernetesClient(testclient.NewSimpleClientset())
+		Convey(fmt.Sprintf("When creating a Namespace named '%s'", expectedName), func() {
+			err := c.CreateNamespace(expectedName)
+			So(err, ShouldBeNil)
+			Convey("Then the Namespace is created as expected", func() {
+				namespace, err := c.KubernetesClient.CoreV1().Namespaces().Get(expectedName, v1.GetOptions{})
+				So(err, ShouldBeNil)
+				So(namespace.Name, ShouldEqual, expectedName)
+			})
 		})
 	})
 }

@@ -18,6 +18,11 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+type GitOpsClient struct {
+	ArgoCDclient     argoclient.Interface
+	KubernetesClient kubernetes.Interface
+}
+
 var kubeconfig string = ""
 var argocdNamespace string = "argocd"
 
@@ -30,7 +35,21 @@ func init() {
 }
 */
 
-func getKubernetesConfig() (*rest.Config, error) {
+func NewGitOpsClient() *GitOpsClient {
+	return &GitOpsClient{}
+}
+
+func (g *GitOpsClient) WithArgoCDClient(client argoclient.Interface) *GitOpsClient {
+	g.ArgoCDclient = client
+	return g
+}
+
+func (g *GitOpsClient) WithKubernetesClient(client kubernetes.Interface) *GitOpsClient {
+	g.KubernetesClient = client
+	return g
+}
+
+func GetKubernetesConfig(kubeconfig string) (*rest.Config, error) {
 	if kubeconfig == "" {
 		log.Printf("using in-cluster configuration")
 		return rest.InClusterConfig()
@@ -39,27 +58,18 @@ func getKubernetesConfig() (*rest.Config, error) {
 	return clientcmd.BuildConfigFromFlags("", kubeconfig)
 }
 
-func getArgoCDClient() (*argoclient.Clientset, error) {
-	config, err := getKubernetesConfig()
-	if err != nil {
-		return nil, err
-	}
+func GetKubernetesClientSet(config *rest.Config) (*kubernetes.Clientset, error) {
+	return kubernetes.NewForConfig(config)
+}
+
+func GetArgoCDClientSet(config *rest.Config) (*argoclient.Clientset, error) {
 	return argoclient.NewForConfig(config)
 }
 
-func createNamespace(name string) error {
-	config, err := getKubernetesConfig()
-	if err != nil {
-		return err
-	}
-
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return err
-	}
+func (g *GitOpsClient) CreateNamespace(name string) error {
 
 	// check if namespace already exists, if true exit return without errors
-	namespaces, err := clientset.CoreV1().Namespaces().List(metav1.ListOptions{
+	namespaces, err := g.KubernetesClient.CoreV1().Namespaces().List(metav1.ListOptions{
 		FieldSelector: fmt.Sprintf("metadata.name=%s", name),
 	})
 	if err != nil {
@@ -70,7 +80,7 @@ func createNamespace(name string) error {
 	}
 
 	namespaceSpec := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: name}}
-	_, err = clientset.CoreV1().Namespaces().Create(namespaceSpec)
+	_, err = g.KubernetesClient.CoreV1().Namespaces().Create(namespaceSpec)
 
 	return err
 }
@@ -78,7 +88,8 @@ func createNamespace(name string) error {
 func getDefaultApplication() *v1alpha1.Application {
 	return &v1alpha1.Application{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "defaultApplication",
+			Name: "defaultApplication",
+
 			Namespace: argocdNamespace,
 			Annotations: map[string]string{
 				"parvaeres.io/email":   "",
@@ -105,15 +116,6 @@ func getDefaultApplication() *v1alpha1.Application {
 				Server:    "https://kubernetes.default.svc",
 			},
 			SyncPolicy: &v1alpha1.SyncPolicy{},
-			/*
-				SyncPolicy: &v1alpha1.SyncPolicy{
-					Automated: &v1alpha1.SyncPolicyAutomated{
-						Prune:    true,
-						SelfHeal: true,
-					},
-					SyncOptions: v1alpha1.SyncOptions{},
-				},
-			*/
 		},
 	}
 }
@@ -157,28 +159,20 @@ func NewApplication(email, repoURL, path string) (*v1alpha1.Application, error) 
 }
 
 // CreateApplication returns an ArgoCD Application relative to email, repoURL and path
-func CreateApplication(email, repoURL, path string) (*v1alpha1.Application, error) {
-	client, err := getArgoCDClient()
-	if err != nil {
-		return nil, errors.Wrap(err, "Unable to create application")
-	}
+func (g *GitOpsClient) CreateApplication(email, repoURL, path string) (*v1alpha1.Application, error) {
 	newApplication, err := NewApplication(email, repoURL, path)
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to create application")
 	}
-	err = createNamespace(newApplication.GetObjectMeta().GetName())
+	err = g.CreateNamespace(newApplication.GetObjectMeta().GetName())
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to create application")
 	}
-	return client.ArgoprojV1alpha1().Applications(argocdNamespace).Create(newApplication)
+	return g.ArgoCDclient.ArgoprojV1alpha1().Applications(argocdNamespace).Create(newApplication)
 }
 
 //SetApplicationAutomatedSyncPolicy sets the sync policy for the application to Automated
-func SetApplicationAutomatedSyncPolicy(application *v1alpha1.Application) error {
-	client, err := getArgoCDClient()
-	if err != nil {
-		return errors.Wrap(err, "Unable to update application")
-	}
+func (g *GitOpsClient) SetApplicationAutomatedSyncPolicy(application *v1alpha1.Application) error {
 	application.Spec.SyncPolicy = &v1alpha1.SyncPolicy{
 		Automated: &v1alpha1.SyncPolicyAutomated{
 			Prune:    true,
@@ -186,22 +180,17 @@ func SetApplicationAutomatedSyncPolicy(application *v1alpha1.Application) error 
 		},
 		SyncOptions: v1alpha1.SyncOptions{},
 	}
-	_, err = client.ArgoprojV1alpha1().Applications(argocdNamespace).Update(application)
+	_, err := g.ArgoCDclient.ArgoprojV1alpha1().Applications(argocdNamespace).Update(application)
 	return err
 }
 
 // ListApplications returns a list of ArgoCD applications
-func ListApplications(email, repoURL, path string) (*v1alpha1.ApplicationList, error) {
-	client, err := getArgoCDClient()
-	if err != nil {
-		return nil, errors.Wrap(err, "Unable to list Applications")
-	}
-
+func (g *GitOpsClient) ListApplications(email, repoURL, path string) (*v1alpha1.ApplicationList, error) {
 	// See comment in newApplication
 	selector := fmt.Sprintf("parvaeres.io/email=%s, parvaeres.io/repoURL=%s, parvaeres.io/path=%s",
 		sha1String(email), sha1String(repoURL), sha1String(path))
 
-	apps, err := client.ArgoprojV1alpha1().Applications(argocdNamespace).List(
+	apps, err := g.ArgoCDclient.ArgoprojV1alpha1().Applications(argocdNamespace).List(
 		metav1.ListOptions{
 			LabelSelector: selector,
 		})
@@ -210,15 +199,11 @@ func ListApplications(email, repoURL, path string) (*v1alpha1.ApplicationList, e
 }
 
 //GetApplicationByName returns an ArgoCD application with the corresponding name
-func GetApplicationByName(name string) (*v1alpha1.Application, error) {
-	client, err := getArgoCDClient()
-	if err != nil {
-		return nil, errors.Wrap(err, "Unable to get Application")
-	}
+func (g *GitOpsClient) GetApplicationByName(name string) (*v1alpha1.Application, error) {
 
 	selector := fmt.Sprintf("metadata.name=%s", name)
 
-	apps, err := client.ArgoprojV1alpha1().Applications(argocdNamespace).List(
+	apps, err := g.ArgoCDclient.ArgoprojV1alpha1().Applications(argocdNamespace).List(
 		metav1.ListOptions{
 			FieldSelector: selector,
 		})
