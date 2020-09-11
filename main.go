@@ -18,10 +18,14 @@ import (
 	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
 
+// FIXME: these should be configurable
+const kubeconfig string = ""
+const argoCDNamespace string = "argocd"
+
 func main() {
 	log.Printf("Server started")
 
-	kubernetesConfig, err := gitops.GetKubernetesConfig("")
+	kubernetesConfig, err := gitops.GetKubernetesConfig(kubeconfig)
 	if err != nil {
 		log.Fatalf(errors.Wrap(err, "Couldn't get kubernetes config. Bailing out.").Error())
 	}
@@ -35,7 +39,10 @@ func main() {
 	}
 
 	DefaultApiService := &parvaeres.DefaultApiService{
-		Gitops: gitops.NewGitOpsClient().WithKubernetesClient(kubernetesClient).WithArgoCDClient(argoCDClient),
+		Gitops: gitops.NewGitOpsClient().
+			WithKubernetesClient(kubernetesClient).
+			WithArgoCDClient(argoCDClient).
+			WithArgoCDNamespace(argoCDNamespace),
 	}
 	DefaultApiController := parvaeres.NewDefaultApiController(DefaultApiService)
 

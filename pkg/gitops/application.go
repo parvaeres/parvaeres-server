@@ -20,20 +20,9 @@ import (
 
 type GitOpsClient struct {
 	ArgoCDclient     argoclient.Interface
+	ArgoCDNamespace  string
 	KubernetesClient kubernetes.Interface
 }
-
-var kubeconfig string = ""
-var argocdNamespace string = "argocd"
-
-/*
-FIXME: hardcoded config for now, interferes with GoConvey flags during testing
-func init() {
-	flag.StringVar(&kubeconfig, "kubeconfig", "~/.kube/config", "path to Kubernetes config file")
-	flag.StringVar(&argocdNamespace, "argocdNamespace", "argocd", "argocd Namespace")
-	flag.Parse()
-}
-*/
 
 func NewGitOpsClient() *GitOpsClient {
 	return &GitOpsClient{}
@@ -41,6 +30,11 @@ func NewGitOpsClient() *GitOpsClient {
 
 func (g *GitOpsClient) WithArgoCDClient(client argoclient.Interface) *GitOpsClient {
 	g.ArgoCDclient = client
+	return g
+}
+
+func (g *GitOpsClient) WithArgoCDNamespace(namespace string) *GitOpsClient {
+	g.ArgoCDNamespace = namespace
 	return g
 }
 
@@ -90,7 +84,6 @@ func getDefaultApplication() *v1alpha1.Application {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "defaultApplication",
 
-			Namespace: argocdNamespace,
 			Annotations: map[string]string{
 				"parvaeres.io/email":   "",
 				"parvaeres.io/repoURL": "",
@@ -168,7 +161,7 @@ func (g *GitOpsClient) CreateApplication(email, repoURL, path string) (*v1alpha1
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to create application")
 	}
-	return g.ArgoCDclient.ArgoprojV1alpha1().Applications(argocdNamespace).Create(newApplication)
+	return g.ArgoCDclient.ArgoprojV1alpha1().Applications(g.ArgoCDNamespace).Create(newApplication)
 }
 
 //SetApplicationAutomatedSyncPolicy sets the sync policy for the application to Automated
@@ -180,7 +173,7 @@ func (g *GitOpsClient) SetApplicationAutomatedSyncPolicy(application *v1alpha1.A
 		},
 		SyncOptions: v1alpha1.SyncOptions{},
 	}
-	_, err := g.ArgoCDclient.ArgoprojV1alpha1().Applications(argocdNamespace).Update(application)
+	_, err := g.ArgoCDclient.ArgoprojV1alpha1().Applications(g.ArgoCDNamespace).Update(application)
 	return err
 }
 
@@ -190,7 +183,7 @@ func (g *GitOpsClient) ListApplications(email, repoURL, path string) (*v1alpha1.
 	selector := fmt.Sprintf("parvaeres.io/email=%s, parvaeres.io/repoURL=%s, parvaeres.io/path=%s",
 		sha1String(email), sha1String(repoURL), sha1String(path))
 
-	apps, err := g.ArgoCDclient.ArgoprojV1alpha1().Applications(argocdNamespace).List(
+	apps, err := g.ArgoCDclient.ArgoprojV1alpha1().Applications(g.ArgoCDNamespace).List(
 		metav1.ListOptions{
 			LabelSelector: selector,
 		})
@@ -203,7 +196,7 @@ func (g *GitOpsClient) GetApplicationByName(name string) (*v1alpha1.Application,
 
 	selector := fmt.Sprintf("metadata.name=%s", name)
 
-	apps, err := g.ArgoCDclient.ArgoprojV1alpha1().Applications(argocdNamespace).List(
+	apps, err := g.ArgoCDclient.ArgoprojV1alpha1().Applications(g.ArgoCDNamespace).List(
 		metav1.ListOptions{
 			FieldSelector: selector,
 		})
