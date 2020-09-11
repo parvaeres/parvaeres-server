@@ -10,16 +10,42 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 
+	"github.com/pkg/errors"
 	parvaeres "github.com/riccardomc/parvaeres/pkg/api"
+	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
 
 func main() {
-	log.Printf("Server started")
+	var kubeconfig, argoCDNamespace string
 
-	DefaultApiService := parvaeres.NewDefaultApiService()
+	log.Printf("Server started")
+	flag.StringVar(&kubeconfig, "kubeconfig", "", "path to Kubernetes config file")
+	flag.StringVar(&argoCDNamespace, "argoCDNamespace", "argocd", "argocd Namespace")
+	flag.Parse()
+
+	kubernetesConfig, err := gitops.GetKubernetesConfig(kubeconfig)
+	if err != nil {
+		log.Fatalf(errors.Wrap(err, "Couldn't get kubernetes config. Bailing out.").Error())
+	}
+	kubernetesClient, err := gitops.GetKubernetesClientSet(kubernetesConfig)
+	if err != nil {
+		log.Fatalf(errors.Wrap(err, "Couldn't get kubernetes client. Bailing out.").Error())
+	}
+	argoCDClient, err := gitops.GetArgoCDClientSet(kubernetesConfig)
+	if err != nil {
+		log.Fatalf(errors.Wrap(err, "Couldn't get ArgoCD client. Bailing out.").Error())
+	}
+
+	DefaultApiService := &parvaeres.DefaultApiService{
+		Gitops: gitops.NewGitOpsClient().
+			WithKubernetesClient(kubernetesClient).
+			WithArgoCDClient(argoCDClient).
+			WithArgoCDNamespace(argoCDNamespace),
+	}
 	DefaultApiController := parvaeres.NewDefaultApiController(DefaultApiService)
 
 	router := parvaeres.NewRouter(DefaultApiController)
