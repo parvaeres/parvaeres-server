@@ -10,6 +10,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 
@@ -18,12 +19,13 @@ import (
 	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
 
-// FIXME: these should be configurable
-const kubeconfig string = ""
-const argoCDNamespace string = "argocd"
-
 func main() {
+	var kubeconfig, argoCDNamespace string
+
 	log.Printf("Server started")
+	flag.StringVar(&kubeconfig, "kubeconfig", "", "path to Kubernetes config file")
+	flag.StringVar(&argoCDNamespace, "argoCDNamespace", "argocd", "argocd Namespace")
+	flag.Parse()
 
 	kubernetesConfig, err := gitops.GetKubernetesConfig(kubeconfig)
 	if err != nil {
