@@ -30,6 +30,7 @@ up() {
             --wait \
             --timeout 120s \
             --update-default-kubeconfig \
+            --port 8081:80@loadbalancer \
             --switch-context \
             --volume "$(pwd)/platform/k3s/registries.yaml:/etc/rancher/k3s/registries.yaml"
     fi

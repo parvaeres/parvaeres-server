@@ -6,6 +6,7 @@ package parvaeres
  */
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
@@ -128,9 +129,12 @@ func GetDeploymentByID(deploymentID string, gitops *gitops.GitOpsClient) (status
 
 //GetDeploymentStatusOfApplication returns the DeploymentStatus corresponding to the application
 func GetDeploymentStatusOfApplication(application *v1alpha1.Application) (*DeploymentStatus, error) {
+	if application == nil {
+		return nil, fmt.Errorf("GetDeploymentStatusOfApplication failed: application is nil")
+	}
 	deploymentStatus := &DeploymentStatus{
 		UUID:     application.GetName(),
-		LiveURLs: []string{},
+		LiveURLs: application.Status.Summary.ExternalURLs,
 		Errors:   []string{},
 		Status:   getDeploymentStatusTypeOfApplication(application),
 	}
