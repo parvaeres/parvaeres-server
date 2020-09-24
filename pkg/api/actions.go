@@ -7,6 +7,7 @@ package parvaeres
 
 import (
 	"fmt"
+	"net/url"
 	"reflect"
 
 	"github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
@@ -134,11 +135,32 @@ func GetDeploymentStatusOfApplication(application *v1alpha1.Application) (*Deplo
 	}
 	deploymentStatus := &DeploymentStatus{
 		UUID:     application.GetName(),
-		LiveURLs: application.Status.Summary.ExternalURLs,
+		LiveURLs: getExternalURLsofApplication(application),
 		Errors:   []string{},
 		Status:   getDeploymentStatusTypeOfApplication(application),
 	}
 	return deploymentStatus, nil
+}
+
+//Return parsed urls, without path
+func getExternalURLsofApplication(application *v1alpha1.Application) (urls []string) {
+	urls = []string{}
+	if application == nil {
+		return
+	}
+
+	for _, rawurl := range application.Status.Summary.ExternalURLs {
+		u, err := url.Parse(rawurl)
+		// FIXME: silently drop malformed URLs, we should log them?
+		if err == nil {
+			u.Path = ""
+			u.RawQuery = ""
+			u.User = nil
+			urls = append(urls, u.String())
+		}
+	}
+
+	return
 }
 
 func applicationHasErrorConditions(application *v1alpha1.Application) bool {
