@@ -25,3 +25,7 @@ k3s-deploy:
 .PHONY: k3s-refresh
 k3s-refresh:
 	kubectl delete pod -l app=parvaeres-server -n argocd
+
+.PHONY: k3s-logs
+k3s-logs:
+	kubectl logs -n argocd -l app=parvaeres-server -f

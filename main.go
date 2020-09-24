@@ -13,18 +13,69 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/pkg/errors"
 	parvaeres "github.com/riccardomc/parvaeres/pkg/api"
+	"github.com/riccardomc/parvaeres/pkg/email"
 	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
 
 func main() {
-	var kubeconfig, argoCDNamespace string
+	var (
+		kubeconfig      string
+		argoCDNamespace string
+		publicURL       string
+		mailgunDomain   string
+		mailgunAPIKey   string
+		mailgunSender   string
+		emailEnabled    bool
+	)
 
 	log.Printf("Server started")
-	flag.StringVar(&kubeconfig, "kubeconfig", "", "path to Kubernetes config file")
-	flag.StringVar(&argoCDNamespace, "argoCDNamespace", "argocd", "argocd Namespace")
+	flag.StringVar(
+		&kubeconfig,
+		"kubeconfig",
+		lookupEnvOrString("PARVAERES_KUBECONFIG", ""),
+		"path to Kubernetes config file",
+	)
+	flag.StringVar(
+		&argoCDNamespace,
+		"argocd-namespace",
+		lookupEnvOrString("PARVAERES_ARGOCD_NAMESPACE", "argocd"),
+		"argocd Namespace",
+	)
+	flag.StringVar(
+		&publicURL,
+		"public-url",
+		lookupEnvOrString("PARVAERES_PUBLIC_URL", "http://poc.parvaeres.io/"),
+		"external URL where parvaeres-server is reacheable",
+	)
+	flag.StringVar(
+		&mailgunDomain,
+		"mailgun-domain",
+		lookupEnvOrString("PARVAERES_MAILGUN_DOMAIN", "poc.parvaeres.io"),
+		"mailgun domain",
+	)
+	flag.StringVar(
+		&mailgunAPIKey,
+		"mailgun-apikey",
+		lookupEnvOrString("PARVAERES_MAILGUN_APIKEY", ""),
+		"mailgun API key",
+	)
+	flag.StringVar(
+		&mailgunSender,
+		"mailgun-sender",
+		lookupEnvOrString("PARVAERES_MAILGUN_SENDER", "Parvaeres Support <support@poc.parvaeres.io>"),
+		"mailgun Sender email address",
+	)
+	flag.BoolVar(
+		&emailEnabled,
+		"email-enabled",
+		lookupEnvOrBool("PARVAERES_EMAIL_ENABLED", false),
+		"enable email delivery",
+	)
 	flag.Parse()
 
 	kubernetesConfig, err := gitops.GetKubernetesConfig(kubeconfig)
@@ -45,10 +96,48 @@ func main() {
 			WithKubernetesClient(kubernetesClient).
 			WithArgoCDClient(argoCDClient).
 			WithArgoCDNamespace(argoCDNamespace),
+		EmailProvider: &email.MailGun{
+			Domain: mailgunDomain,
+			APIKey: mailgunAPIKey,
+			Sender: mailgunSender,
+		},
+		FeatureFlagEmail: emailEnabled,
+		PublicURL:        publicURL,
 	}
 	DefaultApiController := parvaeres.NewDefaultApiController(DefaultApiService)
 
 	router := parvaeres.NewRouter(DefaultApiController)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
+}
+
+// FIXME: this could be improved, maybe cobra
+// See: https://www.gmarik.info/blog/2019/12-factor-golang-flag-package/
+func lookupEnvOrString(key string, defaultVal string) string {
+	if val, ok := os.LookupEnv(key); ok {
+		return val
+	}
+	return defaultVal
+}
+
+func lookupEnvOrInt(key string, defaultVal int) int {
+	if val, ok := os.LookupEnv(key); ok {
+		v, err := strconv.Atoi(val)
+		if err != nil {
+			log.Fatalf("LookupEnvOrInt[%s]: %v", key, err)
+		}
+		return v
+	}
+	return defaultVal
+}
+
+func lookupEnvOrBool(key string, defaultVal bool) bool {
+	if val, ok := os.LookupEnv(key); ok {
+		v, err := strconv.ParseBool(val)
+		if err != nil {
+			log.Fatalf("LookupEnvOrBool[%s]: %v", key, err)
+		}
+		return v
+	}
+	return defaultVal
 }
