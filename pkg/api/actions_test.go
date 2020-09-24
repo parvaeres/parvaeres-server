@@ -155,6 +155,27 @@ var deploymentStatusTests = []deploymentStatusTest{
 		errorString:    "",
 		errorAssertion: ShouldBeNil,
 	},
+	{
+		description: "Given an application with Some URLs with a Path",
+		status: &DeploymentStatus{
+			UUID:     "",
+			LiveURLs: []string{"http://app1.lol.com", "http://app2.lol.com"},
+			Errors:   []string{},
+			Status:   PENDING,
+		},
+		application: &v1alpha1.Application{
+			Spec: v1alpha1.ApplicationSpec{
+				SyncPolicy: &v1alpha1.SyncPolicy{},
+			},
+			Status: v1alpha1.ApplicationStatus{
+				Summary: v1alpha1.ApplicationSummary{
+					ExternalURLs: []string{"http://app1.lol.com/path", "http://app2.lol.com/*"},
+				},
+			},
+		},
+		errorString:    "",
+		errorAssertion: ShouldBeNil,
+	},
 }
 
 func TestGetDeploymentStatusOfApplication(t *testing.T) {
