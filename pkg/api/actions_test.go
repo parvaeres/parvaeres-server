@@ -122,7 +122,7 @@ var deploymentStatusTests = []deploymentStatusTest{
 		description: "Given an application with empty SyncPolicy",
 		status: &DeploymentStatus{
 			UUID:     "",
-			LiveURLs: []string(nil),
+			LiveURLs: []string{},
 			Errors:   []string{},
 			Status:   PENDING,
 		},
