@@ -14,6 +14,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
+	"unsafe"
 
 	"github.com/riccardomc/parvaeres/pkg/email"
 	"github.com/riccardomc/parvaeres/pkg/gitops"
@@ -34,18 +36,56 @@ func NewDefaultApiService() DefaultApiServicer {
 	return &DefaultApiService{}
 }
 
+func printContextInternals(ctx interface{}, inner bool) {
+	contextValues := reflect.ValueOf(ctx).Elem()
+	contextKeys := reflect.TypeOf(ctx).Elem()
+
+	if !inner {
+		log.Printf("\nFields for %s.%s\n", contextKeys.PkgPath(), contextKeys.Name())
+	}
+
+	if contextKeys.Kind() == reflect.Struct {
+		for i := 0; i < contextValues.NumField(); i++ {
+			reflectValue := contextValues.Field(i)
+			reflectValue = reflect.NewAt(reflectValue.Type(), unsafe.Pointer(reflectValue.UnsafeAddr())).Elem()
+
+			reflectField := contextKeys.Field(i)
+
+			if reflectField.Name == "Context" {
+				printContextInternals(reflectValue.Interface(), true)
+			} else {
+				log.Printf("field name: %+v\n", reflectField.Name)
+				log.Printf("value: %+v\n", reflectValue.Interface())
+			}
+		}
+	} else {
+		log.Printf("context is empty (int)\n")
+	}
+}
+
 // DeploymentDeploymentIdGet - Get the deployment with id deploymentId
 func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deploymentId string) (interface{}, error) {
 	log.Printf("DeploymentDeploymentIdGet: %v", deploymentId)
+	log.Printf("Context: %v", ctx)
+	printContextInternals(ctx, true)
+
+	log.Printf("APIKEY: %s", ctx.Value("X-API-KEY").(string))
 	response, _ := GetDeploymentByID(deploymentId, s.Gitops)
 	log.Printf("DeploymentDeploymentIdGet: %v", response)
 	return response, nil
+}
+
+func (s *DefaultApiService) DeploymentDeploymentIdDelete(ctx context.Context, deploymentId string) (interface{}, error) {
+	// TODO
+	return nil, errors.New("service method 'DeploymentDeploymentIdDelete' not implemented")
 }
 
 // DeploymentGet - Get all deployments
 func (s *DefaultApiService) DeploymentGet(ctx context.Context, getDeploymentRequest GetDeploymentRequest) (interface{}, error) {
 	// TODO - update DeploymentGet with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	log.Printf("Context: %v", ctx)
+	log.Printf("APIKEY: %s", ctx.Value("X-API-KEY").(string))
 	return nil, errors.New("service method 'DeploymentGet' not implemented")
 }
 
@@ -54,6 +94,9 @@ func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeployment
 	log.Printf("DeploymentPost: %v", createDeploymentRequest)
 	response, err := CreateDeployment(createDeploymentRequest, s.Gitops)
 
+	log.Printf("Context: %v", ctx)
+	printContextInternals(ctx, false)
+	log.Printf("APIKEY: %s", ctx.Value("X-API-KEY").(string))
 	// If deployment is created without errors
 	if err == nil {
 		// If email communication is enabled

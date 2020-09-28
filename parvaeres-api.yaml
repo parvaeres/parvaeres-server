@@ -17,6 +17,8 @@ paths:
     description: This resource represents the deployments in the system
 
     get:
+      security:
+        - ApiKeyAuth: []
       summary: Get all deployments
       requestBody:
         description: Additional parameters for request
@@ -35,6 +37,8 @@ paths:
 
     post:
       summary: Create a new deployment
+      security:
+        - ApiKeyAuth: []
       requestBody:
         description: Deployment parameters
         required: true
@@ -59,6 +63,8 @@ paths:
 
     get:
       summary: Get the deployment with id deploymentId
+      security:
+        - ApiKeyAuth: []
       parameters:
         - in: path
           name: deploymentId
@@ -74,7 +80,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/DeploymentStatus'
 
+    delete:
+      summary: Delete the deployment with id deploymentId
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: deploymentId
+          schema:
+            type: string
+          required: true
+          description: the id of the deployment to delete
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentStatus'
+
 components:
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+
   schemas:
     CreateDeploymentRequest:
       type: object
