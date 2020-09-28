@@ -19,6 +19,7 @@ import (
 // pass the data to a DefaultApiServicer to perform the required actions, then write the service results to the http response.
 type DefaultApiRouter interface {
 	DeploymentDeploymentIdGet(http.ResponseWriter, *http.Request)
+	DeploymentDeploymentIdLogsGet(http.ResponseWriter, *http.Request)
 	DeploymentGet(http.ResponseWriter, *http.Request)
 	DeploymentPost(http.ResponseWriter, *http.Request)
 }
@@ -29,6 +30,7 @@ type DefaultApiRouter interface {
 // and updated with the logic required for the API.
 type DefaultApiServicer interface {
 	DeploymentDeploymentIdGet(context.Context, string) (interface{}, error)
+	DeploymentDeploymentIdLogsGet(context.Context, string) (interface{}, error)
 	DeploymentGet(context.Context, GetDeploymentRequest) (interface{}, error)
 	DeploymentPost(context.Context, CreateDeploymentRequest) (interface{}, error)
 }

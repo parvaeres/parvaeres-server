@@ -37,8 +37,19 @@ func NewDefaultApiService() DefaultApiServicer {
 // DeploymentDeploymentIdGet - Get the deployment with id deploymentId
 func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deploymentId string) (interface{}, error) {
 	log.Printf("DeploymentDeploymentIdGet: %v", deploymentId)
-	response, _ := GetDeploymentByID(deploymentId, s.Gitops)
+	response, err := GetDeploymentByID(deploymentId, s.Gitops)
+	if err == nil && len(response.Items) > 0 {
+		response.Items[0].LogsURL = fmt.Sprintf("%s/v1/deployment/%s/logs", s.PublicURL, deploymentId)
+	}
 	log.Printf("DeploymentDeploymentIdGet: %v", response)
+	return response, nil
+}
+
+// DeploymentDeploymentIdLogsGet - Get the deployment with id deploymentId
+func (s *DefaultApiService) DeploymentDeploymentIdLogsGet(ctx context.Context, deploymentId string) (interface{}, error) {
+	log.Printf("DeploymentDeploymentIdLogsGet: %v", deploymentId)
+	response, _ := GetDeploymentLogs(deploymentId, s.Gitops)
+	log.Printf("DeploymentDeploymentIdLogsGet: done")
 	return response, nil
 }
 

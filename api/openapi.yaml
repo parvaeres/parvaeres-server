@@ -5,7 +5,7 @@ info:
   version: 0.0.1
 servers:
 - description: Here we go, let's make this happen!
-  url: http://api.alpha.parvaeres.io/v1
+  url: http://api.poc.parvaeres.io/v1
 paths:
   /deployment:
     description: This resource represents the deployments in the system
@@ -66,6 +66,27 @@ paths:
           description: OK
       summary: Get the deployment with id deploymentId
     summary: A deployment
+  /deployment/{deploymentId}/logs:
+    description: Retrieve the logs of the deployment
+    get:
+      parameters:
+      - description: the id of the deployment for which retrieve the logs
+        explode: false
+        in: path
+        name: deploymentId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetDeploymentLogsResponse'
+          description: OK
+      summary: Get the logs of the deployment with deploymentId
+    summary: Get logs
 components:
   schemas:
     CreateDeploymentRequest:
@@ -129,11 +150,31 @@ components:
             type: object
           type: array
       type: object
+    GetDeploymentLogsResponse:
+      example:
+        Message: Message
+        Error: true
+        Items:
+        - '{}'
+        - '{}'
+      properties:
+        Message:
+          type: string
+        Error:
+          type: boolean
+        Items:
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Logs'
+            type: object
+          type: array
+      type: object
     DeploymentStatus:
       example:
         Errors:
         - Errors
         - Errors
+        LogsURL: LogsURL
         LiveURLs:
         - LiveURLs
         - LiveURLs
@@ -151,6 +192,8 @@ components:
           items:
             type: string
           type: array
+        LogsURL:
+          type: string
       type: object
     DeploymentStatusType:
       enum:
@@ -160,3 +203,12 @@ components:
       - ERROR
       - UNKNOWN
       type: string
+    Logs:
+      properties:
+        Pod:
+          type: string
+        Container:
+          type: string
+        Logs:
+          type: string
+      type: object
