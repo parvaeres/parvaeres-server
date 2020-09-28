@@ -176,6 +176,30 @@ var deploymentStatusTests = []deploymentStatusTest{
 		errorString:    "",
 		errorAssertion: ShouldBeNil,
 	},
+	{
+		description: "Given an application with an error condition",
+		status: &DeploymentStatus{
+			UUID:     "",
+			LiveURLs: []string{},
+			Errors:   []string{"There is something wrong with mass consumption"},
+			Status:   PENDING,
+		},
+		application: &v1alpha1.Application{
+			Spec: v1alpha1.ApplicationSpec{
+				SyncPolicy: &v1alpha1.SyncPolicy{},
+			},
+			Status: v1alpha1.ApplicationStatus{
+				Conditions: []v1alpha1.ApplicationCondition{
+					v1alpha1.ApplicationCondition{
+						Type:    v1alpha1.ApplicationConditionInvalidSpecError,
+						Message: "There is something wrong with mass consumption",
+					},
+				},
+			},
+		},
+		errorString:    "",
+		errorAssertion: ShouldBeNil,
+	},
 }
 
 func TestGetDeploymentStatusOfApplication(t *testing.T) {
