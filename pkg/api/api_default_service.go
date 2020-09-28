@@ -49,7 +49,7 @@ func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deplo
 func (s *DefaultApiService) DeploymentDeploymentIdLogsGet(ctx context.Context, deploymentId string) (interface{}, error) {
 	log.Printf("DeploymentDeploymentIdLogsGet: %v", deploymentId)
 	response, _ := GetDeploymentLogs(deploymentId, s.Gitops)
-	log.Printf("DeploymentDeploymentIdLogsGet: %v", response)
+	log.Printf("DeploymentDeploymentIdLogsGet: done")
 	return response, nil
 }
 
