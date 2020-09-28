@@ -2,11 +2,17 @@ package parvaeres
 
 /*
 * In this file we are supposed to bridge our gitops provider (ArgoCD) with the Parvaeres API
+* FIXME: we should decouple Parvaeres Actions from the ArgoCD actions.
+* this shold be done by defining a GitopsProviderInterface and having ArgoCD
+* implement that.
 *
  */
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"log"
 	"net/url"
 	"reflect"
 
@@ -14,6 +20,9 @@ import (
 	"github.com/argoproj/gitops-engine/pkg/health"
 	"github.com/pkg/errors"
 	"github.com/riccardomc/parvaeres/pkg/gitops"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 )
 
 //CreateDeployment is the flow in response to a Deployment creation request
@@ -235,6 +244,71 @@ func EnableDeployment(deploymentID string, gitops *gitops.GitOpsClient) error {
 		return gitops.SetApplicationAutomatedSyncPolicy(application)
 	}
 	return nil
+}
+
+func GetDeploymentLogs(deploymentID string, gitops *gitops.GitOpsClient) (response *GetDeploymentLogsResponse, err error) {
+	response = &GetDeploymentLogsResponse{
+		Error:   false,
+		Message: "",
+		Items:   []Logs{},
+	}
+	application, err := gitops.GetApplicationByName(deploymentID)
+	if err != nil {
+		err = errors.Wrap(err, "GetDeploymentLogs failed, deployment not found")
+		response.Error = true
+		response.Message = err.Error()
+		return
+	}
+
+	// get all pods and containers
+	for _, r := range application.Status.Resources {
+		if r.Kind == "Deployment" {
+			d, err := gitops.KubernetesClient.AppsV1().Deployments(r.Namespace).Get(r.Name, metav1.GetOptions{})
+			if err != nil {
+				log.Printf("cannot get deployment: %s: %v", r.Name, err)
+			}
+			labelMap, _ := metav1.LabelSelectorAsMap(d.Spec.Selector)
+			selector := labels.SelectorFromSet(labelMap).String()
+			log.Printf("getting pods for deployment: %s using selector: %s", r.Name, selector)
+			pods, err := gitops.KubernetesClient.CoreV1().Pods(r.Namespace).List(
+				metav1.ListOptions{
+					LabelSelector: selector,
+				})
+			if err != nil {
+				log.Printf("cannot get pods: %s: %v", r.Name, err)
+			}
+			log.Printf("fetching logs for %d pods", len(pods.Items))
+			for _, p := range pods.Items {
+				for _, c := range p.Spec.Containers {
+					log.Printf("fetching logs for pod: %s, container: %s", p.Name, c.Name)
+					req := gitops.KubernetesClient.CoreV1().Pods(r.Namespace).GetLogs(
+						p.Name,
+						&corev1.PodLogOptions{
+							Container: c.Name,
+						},
+					)
+					// FIXME: error handling
+					logs, err := req.Stream()
+					if err != nil {
+						log.Println("error fetching logs: %s", err.Error())
+					}
+					defer logs.Close()
+					buf := new(bytes.Buffer)
+					size, err := io.Copy(buf, logs)
+					if err != nil {
+						log.Println("error copying logs: %s", err.Error())
+					}
+					log.Printf("found %d bytes of logs", size)
+					response.Items = append(response.Items, Logs{
+						Pod:       p.Name,
+						Container: c.Name,
+						Logs:      buf.String(),
+					})
+				}
+			}
+		}
+	}
+	return
 }
 
 //GetDeploymentByIDRequestValidate FIXME: is not implemented yet

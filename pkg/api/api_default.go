@@ -37,6 +37,12 @@ func (c *DefaultApiController) Routes() Routes {
 			c.DeploymentDeploymentIdGet,
 		},
 		{
+			"DeploymentDeploymentIdLogsGet",
+			strings.ToUpper("Get"),
+			"/v1/deployment/{deploymentId}/logs",
+			c.DeploymentDeploymentIdLogsGet,
+		},
+		{
 			"DeploymentGet",
 			strings.ToUpper("Get"),
 			"/v1/deployment",
@@ -56,6 +62,19 @@ func (c *DefaultApiController) DeploymentDeploymentIdGet(w http.ResponseWriter, 
 	params := mux.Vars(r)
 	deploymentId := params["deploymentId"]
 	result, err := c.service.DeploymentDeploymentIdGet(r.Context(), deploymentId)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+
+	EncodeJSONResponse(result, nil, w)
+}
+
+// DeploymentDeploymentIdLogsGet - Get the logs of the deployment with deploymentId
+func (c *DefaultApiController) DeploymentDeploymentIdLogsGet(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	deploymentId := params["deploymentId"]
+	result, err := c.service.DeploymentDeploymentIdLogsGet(r.Context(), deploymentId)
 	if err != nil {
 		w.WriteHeader(500)
 		return
