@@ -135,15 +135,15 @@ func GetDeploymentStatusOfApplication(application *v1alpha1.Application) (*Deplo
 	}
 	deploymentStatus := &DeploymentStatus{
 		UUID:     application.GetName(),
-		LiveURLs: getExternalURLsofApplication(application),
-		Errors:   []string{},
+		LiveURLs: getExternalURLsOfApplication(application),
+		Errors:   getErrorsOfApplication(application),
 		Status:   getDeploymentStatusTypeOfApplication(application),
 	}
 	return deploymentStatus, nil
 }
 
 //Return parsed urls, without path
-func getExternalURLsofApplication(application *v1alpha1.Application) (urls []string) {
+func getExternalURLsOfApplication(application *v1alpha1.Application) (urls []string) {
 	urls = []string{}
 	if application == nil {
 		return
@@ -160,6 +160,18 @@ func getExternalURLsofApplication(application *v1alpha1.Application) (urls []str
 		}
 	}
 
+	return
+}
+
+func getErrorsOfApplication(application *v1alpha1.Application) (errors []string) {
+	errors = []string{}
+	if application != nil {
+		for _, c := range application.Status.Conditions {
+			if c.IsError() {
+				errors = append(errors, c.Message)
+			}
+		}
+	}
 	return
 }
 
