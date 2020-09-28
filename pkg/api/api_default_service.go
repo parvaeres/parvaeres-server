@@ -12,8 +12,10 @@ package parvaeres
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 
+	"github.com/riccardomc/parvaeres/pkg/email"
 	"github.com/riccardomc/parvaeres/pkg/gitops"
 )
 
@@ -21,7 +23,10 @@ import (
 // This service should implement the business logic for every endpoint for the DefaultApi API.
 // Include any external packages or services that will be required by this service.
 type DefaultApiService struct {
-	Gitops *gitops.GitOpsClient
+	Gitops           *gitops.GitOpsClient
+	EmailProvider    email.EmailProviderInterface
+	FeatureFlagEmail bool
+	PublicURL        string
 }
 
 // NewDefaultApiService creates a default api service
@@ -47,7 +52,28 @@ func (s *DefaultApiService) DeploymentGet(ctx context.Context, getDeploymentRequ
 // DeploymentPost - Create a new deployment
 func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeploymentRequest CreateDeploymentRequest) (interface{}, error) {
 	log.Printf("DeploymentPost: %v", createDeploymentRequest)
-	response, _ := CreateDeployment(createDeploymentRequest, s.Gitops)
+	response, err := CreateDeployment(createDeploymentRequest, s.Gitops)
+
+	// If deployment is created without errors
+	if err == nil {
+		// If email communication is enabled
+		if s.FeatureFlagEmail {
+			id := response.Items[0].UUID
+			emailResponse, err := s.EmailProvider.Send(ctx, &email.SendEmailRequest{
+				Subject:   "Confirm your application",
+				Body:      fmt.Sprintf("%s/v1/deployment/%s", s.PublicURL, id),
+				Recipient: createDeploymentRequest.Email,
+			})
+			if err != nil {
+				//FIXME: we should retry
+				log.Printf("confirmation email failure: %s", err.Error())
+			} else {
+				log.Printf("confirmation email success: %s", emailResponse.ID)
+			}
+		}
+		// if email is enabled, we strip ID from API response
+		response.Items[0].UUID = ""
+	}
 	log.Printf("DeploymentPost: %v", response)
 	return response, nil
 }

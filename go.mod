@@ -5,9 +5,13 @@ go 1.14
 require (
 	github.com/argoproj/argo-cd v1.6.1
 	github.com/argoproj/gitops-engine v0.1.2
+	github.com/gobuffalo/envy v1.9.0 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.3
+	github.com/mailgun/mailgun-go v2.0.0+incompatible
+	github.com/mailgun/mailgun-go/v3 v3.6.4
+	github.com/mailgun/mailgun-go/v4 v4.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
 	k8s.io/api v0.16.6
