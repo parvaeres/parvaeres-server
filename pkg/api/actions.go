@@ -290,13 +290,13 @@ func GetDeploymentLogs(deploymentID string, gitops *gitops.GitOpsClient) (respon
 					// FIXME: error handling
 					logs, err := req.Stream()
 					if err != nil {
-						log.Println("error fetching logs: %s", err.Error())
+						log.Printf("error fetching logs: %s", err.Error())
 					}
 					defer logs.Close()
 					buf := new(bytes.Buffer)
 					size, err := io.Copy(buf, logs)
 					if err != nil {
-						log.Println("error copying logs: %s", err.Error())
+						log.Printf("error copying logs: %s", err.Error())
 					}
 					log.Printf("found %d bytes of logs", size)
 					response.Items = append(response.Items, Logs{
