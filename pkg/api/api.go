@@ -22,6 +22,7 @@ type DefaultApiRouter interface {
 	DeploymentDeploymentIdLogsGet(http.ResponseWriter, *http.Request)
 	DeploymentGet(http.ResponseWriter, *http.Request)
 	DeploymentPost(http.ResponseWriter, *http.Request)
+	RootGet(http.ResponseWriter, *http.Request)
 }
 
 // DefaultApiServicer defines the api actions for the DefaultApi service
@@ -33,4 +34,5 @@ type DefaultApiServicer interface {
 	DeploymentDeploymentIdLogsGet(context.Context, string) (interface{}, error)
 	DeploymentGet(context.Context, GetDeploymentRequest) (interface{}, error)
 	DeploymentPost(context.Context, CreateDeploymentRequest) (interface{}, error)
+	RootGet(context.Context) (interface{}, error)
 }

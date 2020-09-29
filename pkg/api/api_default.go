@@ -54,6 +54,12 @@ func (c *DefaultApiController) Routes() Routes {
 			"/v1/deployment",
 			c.DeploymentPost,
 		},
+		{
+			"RootGet",
+			strings.ToUpper("Get"),
+			"/v1/",
+			c.RootGet,
+		},
 	}
 }
 
@@ -109,6 +115,17 @@ func (c *DefaultApiController) DeploymentPost(w http.ResponseWriter, r *http.Req
 	}
 
 	result, err := c.service.DeploymentPost(r.Context(), *createDeploymentRequest)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+
+	EncodeJSONResponse(result, nil, w)
+}
+
+// RootGet - Alive
+func (c *DefaultApiController) RootGet(w http.ResponseWriter, r *http.Request) {
+	result, err := c.service.RootGet(r.Context())
 	if err != nil {
 		w.WriteHeader(500)
 		return

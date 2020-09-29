@@ -7,6 +7,14 @@ servers:
 - description: Here we go, let's make this happen!
   url: http://api.poc.parvaeres.io/v1
 paths:
+  /:
+    description: This is Parvaeres Server
+    get:
+      responses:
+        "200":
+          description: OK
+      summary: Alive
+    summary: Parvaeres Server
   /deployment:
     description: This resource represents the deployments in the system
     get:

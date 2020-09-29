@@ -12,6 +12,15 @@ servers:
 
 paths:
 
+  /:
+    summary: Parvaeres Server
+    description: This is Parvaeres Server
+    get:
+      summary: Alive
+      responses:
+        '200':
+          description: OK
+
   /deployment:
     summary: Deployments
     description: This resource represents the deployments in the system
