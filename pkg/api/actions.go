@@ -180,22 +180,12 @@ func getExternalURLsOfApplication(application *v1alpha1.Application, gitops *git
 			}
 			if s.Spec.Type == v1.ServiceTypeLoadBalancer {
 				for _, i := range s.Status.LoadBalancer.Ingress {
-					if i.Hostname != "" {
-						u, err := url.Parse(i.Hostname)
-						if err == nil {
-							u.Path = ""
-							u.RawQuery = ""
-							u.User = nil
-							urls = append(urls, u.String())
+					for _, p := range s.Spec.Ports {
+						if i.Hostname != "" {
+							urls = append(urls, fmt.Sprintf("http://%s:%d/", i.Hostname, p.Port))
 						}
-					}
-					if i.IP != "" {
-						u, err := url.Parse(i.IP)
-						if err == nil {
-							u.Path = ""
-							u.RawQuery = ""
-							u.User = nil
-							urls = append(urls, u.String())
+						if i.IP != "" {
+							urls = append(urls, fmt.Sprintf("http://%s:%d/", i.IP, p.Port))
 						}
 					}
 				}
