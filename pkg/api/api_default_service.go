@@ -36,7 +36,6 @@ func NewDefaultApiService() DefaultApiServicer {
 
 // RootGet - Get the deployment with id deploymentId
 func (s *DefaultApiService) RootGet(ctx context.Context) (interface{}, error) {
-	log.Printf("GetRoot")
 	return "This is Parvaeres Server, hi :)", nil
 }
 
