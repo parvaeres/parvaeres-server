@@ -145,6 +145,9 @@ func GetDeploymentStatusOfApplication(application *v1alpha1.Application, gitops 
 	}
 	deploymentStatus := &DeploymentStatus{
 		UUID:     application.GetName(),
+		Email:    application.Annotations["parvaeres.io/email"],
+		RepoURL:  application.Annotations["parvaeres.io/repoURL"],
+		Path:     application.Annotations["parvaeres.io/path"],
 		LiveURLs: getExternalURLsOfApplication(application, gitops),
 		Errors:   getErrorsOfApplication(application),
 		Status:   getDeploymentStatusTypeOfApplication(application),

@@ -179,16 +179,25 @@ components:
       type: object
     DeploymentStatus:
       example:
+        Path: Path
         Errors:
         - Errors
         - Errors
+        Email: Email
         LogsURL: LogsURL
         LiveURLs:
         - LiveURLs
         - LiveURLs
+        RepoURL: RepoURL
         UUID: UUID
       properties:
         UUID:
+          type: string
+        RepoURL:
+          type: string
+        Path:
+          type: string
+        Email:
           type: string
         Status:
           $ref: '#/components/schemas/DeploymentStatusType'
