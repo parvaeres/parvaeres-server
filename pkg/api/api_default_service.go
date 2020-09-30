@@ -86,9 +86,9 @@ func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeployment
 			} else {
 				log.Printf("confirmation email success: %s", emailResponse.ID)
 			}
+			// if email is enabled, we strip ID from API response
+			response.Items[0].UUID = ""
 		}
-		// if email is enabled, we strip ID from API response
-		response.Items[0].UUID = ""
 	}
 	log.Printf("DeploymentPost: %v", response)
 	return response, nil
