@@ -2,6 +2,7 @@ package email
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/mailgun/mailgun-go/v4"
@@ -23,6 +24,7 @@ type SendEmailResponse struct {
 //EmailProviderInterface is a thing that sends emails
 type EmailProviderInterface interface {
 	Send(context.Context, *SendEmailRequest) (*SendEmailResponse, error)
+	EmailBody(string) string
 }
 
 //MailGun represents a MailGun EmailProvider
@@ -51,3 +53,26 @@ func (m *MailGun) Send(ctx context.Context, request *SendEmailRequest) (*SendEma
 	_, id, err := mg.Send(ctx, message)
 	return &SendEmailResponse{ID: id}, err
 }
+
+//EmailBody returns the body of the email to be sent
+func (m *MailGun) EmailBody(link string) string {
+	return fmt.Sprintf(EmailBodyTemplate, link)
+}
+
+//EmailBodyTemplate is an email body template
+var EmailBodyTemplate string = `
+Welcome to Parvaeres! 
+
+Your app deployment request has been received.
+But first, please confirm by clicking on this link:
+
+%s
+
+You will be able to see the status of your application following the same link.
+
+Thank you,
+
+-- 
+Parvaeres Support
+which is actually just Riccardo for now...
+`

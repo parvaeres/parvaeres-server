@@ -78,7 +78,7 @@ func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeployment
 			id := response.Items[0].UUID
 			emailResponse, err := s.EmailProvider.Send(ctx, &email.SendEmailRequest{
 				Subject:   "Confirm your application",
-				Body:      fmt.Sprintf("%s/v1/deployment/%s", s.PublicURL, id),
+				Body:      s.EmailProvider.EmailBody(fmt.Sprintf("%s/v1/deployment/%s", s.PublicURL, id)),
 				Recipient: createDeploymentRequest.Email,
 			})
 			if err != nil {
