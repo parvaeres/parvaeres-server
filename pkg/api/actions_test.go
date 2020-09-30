@@ -207,7 +207,7 @@ func TestGetDeploymentStatusOfApplication(t *testing.T) {
 	for _, test := range deploymentStatusTests {
 		Convey(test.description, t, func() {
 			Convey("When getting the corresponding DeploymentStatus", func() {
-				deploymentStatus, err := GetDeploymentStatusOfApplication(test.application)
+				deploymentStatus, err := GetDeploymentStatusOfApplication(test.application, nil)
 				Convey("Then the status value is as expected", func() {
 					So(err, test.errorAssertion)
 					if err != nil {

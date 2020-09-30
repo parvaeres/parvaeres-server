@@ -21,6 +21,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/riccardomc/parvaeres/pkg/gitops"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
@@ -65,7 +66,7 @@ func CreateDeployment(request CreateDeploymentRequest, gitops *gitops.GitOpsClie
 		}, err
 	}
 
-	status, err := GetDeploymentStatusOfApplication(application)
+	status, err := GetDeploymentStatusOfApplication(application, gitops)
 	if err != nil {
 		//FIXME: handle cannot get status: the app is created but status cannot be retrieved
 	}
@@ -106,7 +107,7 @@ func GetDeploymentByID(deploymentID string, gitops *gitops.GitOpsClient) (status
 		return
 	}
 
-	deploymentStatus, err := GetDeploymentStatusOfApplication(application)
+	deploymentStatus, err := GetDeploymentStatusOfApplication(application, gitops)
 	if err != nil {
 		err = errors.Wrap(err, "GetDeployment deployment created but cannot get status")
 		status.Error = true
@@ -122,7 +123,7 @@ func GetDeploymentByID(deploymentID string, gitops *gitops.GitOpsClient) (status
 		return
 	}
 
-	deploymentStatus, err = GetDeploymentStatusOfApplication(application)
+	deploymentStatus, err = GetDeploymentStatusOfApplication(application, gitops)
 	if err != nil {
 		err = errors.Wrap(err, "GetDeployment deployment created but cannot get status")
 		status.Error = true
@@ -138,13 +139,13 @@ func GetDeploymentByID(deploymentID string, gitops *gitops.GitOpsClient) (status
 }
 
 //GetDeploymentStatusOfApplication returns the DeploymentStatus corresponding to the application
-func GetDeploymentStatusOfApplication(application *v1alpha1.Application) (*DeploymentStatus, error) {
+func GetDeploymentStatusOfApplication(application *v1alpha1.Application, gitops *gitops.GitOpsClient) (*DeploymentStatus, error) {
 	if application == nil {
 		return nil, fmt.Errorf("GetDeploymentStatusOfApplication failed: application is nil")
 	}
 	deploymentStatus := &DeploymentStatus{
 		UUID:     application.GetName(),
-		LiveURLs: getExternalURLsOfApplication(application),
+		LiveURLs: getExternalURLsOfApplication(application, gitops),
 		Errors:   getErrorsOfApplication(application),
 		Status:   getDeploymentStatusTypeOfApplication(application),
 	}
@@ -152,12 +153,13 @@ func GetDeploymentStatusOfApplication(application *v1alpha1.Application) (*Deplo
 }
 
 //Return parsed urls, without path
-func getExternalURLsOfApplication(application *v1alpha1.Application) (urls []string) {
+func getExternalURLsOfApplication(application *v1alpha1.Application, gitops *gitops.GitOpsClient) (urls []string) {
 	urls = []string{}
 	if application == nil {
 		return
 	}
 
+	// Check ArgoCD summary - Ingresses only
 	for _, rawurl := range application.Status.Summary.ExternalURLs {
 		u, err := url.Parse(rawurl)
 		// FIXME: silently drop malformed URLs, we should log them?
@@ -169,6 +171,38 @@ func getExternalURLsOfApplication(application *v1alpha1.Application) (urls []str
 		}
 	}
 
+	// See if we have any Service of type LoadBalancer
+	for _, r := range application.Status.Resources {
+		if r.Kind == "Service" {
+			s, err := gitops.KubernetesClient.CoreV1().Services(r.Namespace).Get(r.Name, metav1.GetOptions{})
+			if err != nil {
+				log.Printf("cannot get service: %s: %v", r.Name, err)
+			}
+			if s.Spec.Type == v1.ServiceTypeLoadBalancer {
+				for _, i := range s.Status.LoadBalancer.Ingress {
+					if i.Hostname != "" {
+						u, err := url.Parse(i.Hostname)
+						if err == nil {
+							u.Path = ""
+							u.RawQuery = ""
+							u.User = nil
+							urls = append(urls, u.String())
+						}
+					}
+					if i.IP != "" {
+						u, err := url.Parse(i.IP)
+						if err == nil {
+							u.Path = ""
+							u.RawQuery = ""
+							u.User = nil
+							urls = append(urls, u.String())
+						}
+					}
+				}
+			}
+
+		}
+	}
 	return
 }
 
@@ -260,7 +294,7 @@ func GetDeploymentLogs(deploymentID string, gitops *gitops.GitOpsClient) (respon
 		return
 	}
 
-	// get all pods and containers
+	// get all pods and containers FIXME: we should check StatefulSets, DaemonSets, etc.
 	for _, r := range application.Status.Resources {
 		if r.Kind == "Deployment" {
 			d, err := gitops.KubernetesClient.AppsV1().Deployments(r.Namespace).Get(r.Name, metav1.GetOptions{})
