@@ -19,7 +19,7 @@ import (
 	"github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	"github.com/argoproj/gitops-engine/pkg/health"
 	"github.com/pkg/errors"
-	"github.com/riccardomc/parvaeres/pkg/gitops"
+	"github.com/parvaeres/parvaeres/pkg/gitops"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

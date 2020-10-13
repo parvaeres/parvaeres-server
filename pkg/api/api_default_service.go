@@ -15,8 +15,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/riccardomc/parvaeres/pkg/email"
-	"github.com/riccardomc/parvaeres/pkg/gitops"
+	"github.com/parvaeres/parvaeres/pkg/email"
+	"github.com/parvaeres/parvaeres/pkg/gitops"
 )
 
 // DefaultApiService is a service that implents the logic for the DefaultApiServicer

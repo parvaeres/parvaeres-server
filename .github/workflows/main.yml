@@ -31,7 +31,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
-          repository: riccardomc/parvaeres/parvaeres-server
+          repository: parvaeres/parvaeres/parvaeres-server
           tag_with_ref: true
           push: ${{ github.event_name != 'pull_request' }}
           labels: |

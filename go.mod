@@ -1,4 +1,4 @@
-module github.com/riccardomc/parvaeres
+module github.com/parvaeres/parvaeres
 
 go 1.14
 

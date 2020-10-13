@@ -17,9 +17,9 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	parvaeres "github.com/riccardomc/parvaeres/pkg/api"
-	"github.com/riccardomc/parvaeres/pkg/email"
-	"github.com/riccardomc/parvaeres/pkg/gitops"
+	parvaeres "github.com/parvaeres/parvaeres/pkg/api"
+	"github.com/parvaeres/parvaeres/pkg/email"
+	"github.com/parvaeres/parvaeres/pkg/gitops"
 )
 
 func main() {

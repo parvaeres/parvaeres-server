@@ -17,7 +17,7 @@ docker run \
         --input-spec parvaeres-api.yaml \
         --config openapi-config.yaml \
         --generator-name go-server \
-        --git-user-id riccardomc \
+        --git-user-id parvaeres \
         --git-repo-id parvaeres \
         --output $DESTINATION
 
