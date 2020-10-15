@@ -29,9 +29,9 @@ jobs:
         with:
           context: .
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: parvaeres/parvaeres-server/parvaeres-server
+          password: ${{ secrets.GHCR_PAT }}
+          registry: ghcr.io
+          repository: parvaeres/parvaeres-server
           tag_with_ref: true
           push: ${{ github.event_name != 'pull_request' }}
           labels: |
