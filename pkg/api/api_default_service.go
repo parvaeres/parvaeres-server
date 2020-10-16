@@ -44,7 +44,7 @@ func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deplo
 	log.Printf("DeploymentDeploymentIdGet: %v", deploymentId)
 	response, err := GetDeploymentByID(deploymentId, s.Gitops)
 	if err == nil && len(response.Items) > 0 {
-		response.Items[0].LogsURL = fmt.Sprintf("%s/deployment/%s/logs", s.PublicURL, deploymentId)
+		response.Items[0].LogsURL = fmt.Sprintf("%s/v1/deployment/%s/logs", s.PublicURL, deploymentId)
 	}
 	log.Printf("DeploymentDeploymentIdGet: %v", response)
 	return response, nil
