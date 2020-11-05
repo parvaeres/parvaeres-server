@@ -1,12 +1,63 @@
-package parvaeres
+package argocd
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	"github.com/argoproj/gitops-engine/pkg/health"
+	"github.com/google/uuid"
+	parvaeres "github.com/parvaeres/parvaeres/pkg/api"
 	. "github.com/smartystreets/goconvey/convey"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	testclient "k8s.io/client-go/kubernetes/fake"
 )
+
+//TestApplication tests the application generation
+func TestNewApplication(t *testing.T) {
+	Convey("Given a url and an email", t, func() {
+		inputURL := "http://blabla"
+		inputEmail := "my@email.com"
+		inputPath := "/"
+		Convey("When creating an Application", func() {
+			newApplication, err := newApplication(inputEmail, inputURL, inputPath)
+			Convey("Then the Application fields are populated as expected", func() {
+				So(err, ShouldBeNil)
+				So(newApplication.Spec.Source.RepoURL, ShouldEqual, inputURL)
+				So(newApplication.ObjectMeta.Annotations["parvaeres.io/email"], ShouldEqual, inputEmail)
+				So(newApplication.ObjectMeta.Annotations["parvaeres.io/repoURL"], ShouldEqual, inputURL)
+				So(newApplication.ObjectMeta.Annotations["parvaeres.io/path"], ShouldEqual, inputPath)
+				So(newApplication.ObjectMeta.Labels["parvaeres.io/email"], ShouldEqual, sha1String(inputEmail))
+				So(newApplication.ObjectMeta.Labels["parvaeres.io/repoURL"], ShouldEqual, sha1String(inputURL))
+				So(newApplication.ObjectMeta.Labels["parvaeres.io/path"], ShouldEqual, sha1String(inputPath))
+				Convey("And the name field is a UUID", func() {
+					uuid, err := uuid.Parse(newApplication.ObjectMeta.Name)
+					So(err, ShouldBeNil)
+					So(uuid.Version().String(), ShouldEqual, "VERSION_4")
+				})
+			})
+		})
+	})
+
+}
+
+func TestCreateNamespace(t *testing.T) {
+	expectedName := "myNamespace"
+	Convey("Given a GitOpsClient", t, func() {
+		c := ArgoCD{
+			KubernetesClient: testclient.NewSimpleClientset(),
+		}
+		Convey(fmt.Sprintf("When creating a Namespace named '%s'", expectedName), func() {
+			err := c.createNamespace(expectedName)
+			So(err, ShouldBeNil)
+			Convey("Then the Namespace is created as expected", func() {
+				namespace, err := c.KubernetesClient.CoreV1().Namespaces().Get(expectedName, v1.GetOptions{})
+				So(err, ShouldBeNil)
+				So(namespace.Name, ShouldEqual, expectedName)
+			})
+		})
+	})
+}
 
 /*TestGetDeploymentStatusTypeOfApplication tests the translation of the state from ArgoCD
 * to something we can communicate to the user DeploymentStatusType enum in API spec
@@ -15,18 +66,18 @@ import (
 type DeploymentStatusTypeTest struct {
 	description string
 	application *v1alpha1.Application
-	status      DeploymentStatusType
+	status      parvaeres.DeploymentStatusType
 }
 
 var tests = []DeploymentStatusTypeTest{
 	{
 		description: "Given a nil application",
-		status:      UNKNOWN,
+		status:      parvaeres.UNKNOWN,
 		application: nil,
 	},
 	{
 		description: "Given an application with empty SyncPolicy",
-		status:      PENDING,
+		status:      parvaeres.PENDING,
 		application: &v1alpha1.Application{
 			Spec: v1alpha1.ApplicationSpec{
 				SyncPolicy: &v1alpha1.SyncPolicy{},
@@ -35,7 +86,7 @@ var tests = []DeploymentStatusTypeTest{
 	},
 	{
 		description: "Given an application with set SyncPolicy and no Status",
-		status:      SYNCING,
+		status:      parvaeres.SYNCING,
 		application: &v1alpha1.Application{
 			Spec: v1alpha1.ApplicationSpec{
 				SyncPolicy: &v1alpha1.SyncPolicy{
@@ -49,7 +100,7 @@ var tests = []DeploymentStatusTypeTest{
 	},
 	{
 		description: "Given an application with SyncPolicy and HealthStatusHealthy",
-		status:      DEPLOYED,
+		status:      parvaeres.DEPLOYED,
 		application: &v1alpha1.Application{
 			Spec: v1alpha1.ApplicationSpec{
 				SyncPolicy: &v1alpha1.SyncPolicy{
@@ -68,7 +119,7 @@ var tests = []DeploymentStatusTypeTest{
 	},
 	{
 		description: "Given an application with SyncPolicy and HealthStatusMissing",
-		status:      ERROR,
+		status:      parvaeres.ERROR,
 		application: &v1alpha1.Application{
 			Spec: v1alpha1.ApplicationSpec{
 				SyncPolicy: &v1alpha1.SyncPolicy{
@@ -105,7 +156,7 @@ func TestGetDeploymentStatusTypeOfApplication(t *testing.T) {
 type deploymentStatusTest struct {
 	description    string
 	application    *v1alpha1.Application
-	status         *DeploymentStatus
+	status         *parvaeres.DeploymentStatus
 	errorString    string
 	errorAssertion func(interface{}, ...interface{}) string
 }
@@ -115,16 +166,16 @@ var deploymentStatusTests = []deploymentStatusTest{
 		description:    "Given a nil application",
 		status:         nil,
 		application:    nil,
-		errorString:    "GetDeploymentStatusOfApplication failed: application is nil",
+		errorString:    "getDeploymentStatusOfApplication failed: application is nil",
 		errorAssertion: ShouldNotBeNil,
 	},
 	{
 		description: "Given an application with empty SyncPolicy",
-		status: &DeploymentStatus{
+		status: &parvaeres.DeploymentStatus{
 			UUID:     "",
 			LiveURLs: []string{},
 			Errors:   []string{},
-			Status:   PENDING,
+			Status:   parvaeres.PENDING,
 		},
 		application: &v1alpha1.Application{
 			Spec: v1alpha1.ApplicationSpec{
@@ -136,11 +187,11 @@ var deploymentStatusTests = []deploymentStatusTest{
 	},
 	{
 		description: "Given an application with Some URLs",
-		status: &DeploymentStatus{
+		status: &parvaeres.DeploymentStatus{
 			UUID:     "",
 			LiveURLs: []string{"http://app.lol.com"},
 			Errors:   []string{},
-			Status:   PENDING,
+			Status:   parvaeres.PENDING,
 		},
 		application: &v1alpha1.Application{
 			Spec: v1alpha1.ApplicationSpec{
@@ -157,11 +208,11 @@ var deploymentStatusTests = []deploymentStatusTest{
 	},
 	{
 		description: "Given an application with Some URLs with a Path",
-		status: &DeploymentStatus{
+		status: &parvaeres.DeploymentStatus{
 			UUID:     "",
 			LiveURLs: []string{"http://app1.lol.com", "http://app2.lol.com"},
 			Errors:   []string{},
-			Status:   PENDING,
+			Status:   parvaeres.PENDING,
 		},
 		application: &v1alpha1.Application{
 			Spec: v1alpha1.ApplicationSpec{
@@ -178,11 +229,11 @@ var deploymentStatusTests = []deploymentStatusTest{
 	},
 	{
 		description: "Given an application with an error condition",
-		status: &DeploymentStatus{
+		status: &parvaeres.DeploymentStatus{
 			UUID:     "",
 			LiveURLs: []string{},
 			Errors:   []string{"There is something wrong with mass consumption"},
-			Status:   PENDING,
+			Status:   parvaeres.PENDING,
 		},
 		application: &v1alpha1.Application{
 			Spec: v1alpha1.ApplicationSpec{
@@ -207,7 +258,10 @@ func TestGetDeploymentStatusOfApplication(t *testing.T) {
 	for _, test := range deploymentStatusTests {
 		Convey(test.description, t, func() {
 			Convey("When getting the corresponding DeploymentStatus", func() {
-				deploymentStatus, err := GetDeploymentStatusOfApplication(test.application, nil)
+				c := ArgoCD{
+					KubernetesClient: testclient.NewSimpleClientset(),
+				}
+				deploymentStatus, err := c.getDeploymentStatusOfApplication(test.application)
 				Convey("Then the status value is as expected", func() {
 					So(err, test.errorAssertion)
 					if err != nil {

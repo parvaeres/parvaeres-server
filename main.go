@@ -16,10 +16,10 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/pkg/errors"
 	parvaeres "github.com/parvaeres/parvaeres/pkg/api"
+	"github.com/parvaeres/parvaeres/pkg/argocd"
 	"github.com/parvaeres/parvaeres/pkg/email"
-	"github.com/parvaeres/parvaeres/pkg/gitops"
+	"github.com/pkg/errors"
 )
 
 func main() {
@@ -78,28 +78,29 @@ func main() {
 	)
 	flag.Parse()
 
-	kubernetesConfig, err := gitops.GetKubernetesConfig(kubeconfig)
+	kubernetesConfig, err := argocd.GetKubernetesConfig(kubeconfig)
 	if err != nil {
 		log.Fatalf(errors.Wrap(err, "Couldn't get kubernetes config. Bailing out.").Error())
 	}
-	kubernetesClient, err := gitops.GetKubernetesClientSet(kubernetesConfig)
+	kubernetesClient, err := argocd.GetKubernetesClientSet(kubernetesConfig)
 	if err != nil {
 		log.Fatalf(errors.Wrap(err, "Couldn't get kubernetes client. Bailing out.").Error())
 	}
-	argoCDClient, err := gitops.GetArgoCDClientSet(kubernetesConfig)
+	argoCDClient, err := argocd.GetArgoCDClientSet(kubernetesConfig)
 	if err != nil {
 		log.Fatalf(errors.Wrap(err, "Couldn't get ArgoCD client. Bailing out.").Error())
 	}
 
 	DefaultApiService := &parvaeres.DefaultApiService{
-		Gitops: gitops.NewGitOpsClient().
-			WithKubernetesClient(kubernetesClient).
-			WithArgoCDClient(argoCDClient).
-			WithArgoCDNamespace(argoCDNamespace),
 		EmailProvider: &email.MailGun{
 			Domain: mailgunDomain,
 			APIKey: mailgunAPIKey,
 			Sender: mailgunSender,
+		},
+		GitopsProvider: &argocd.ArgoCD{
+			ArgoCDNamespace:  argoCDNamespace,
+			ArgoCDclient:     argoCDClient,
+			KubernetesClient: kubernetesClient,
 		},
 		FeatureFlagEmail: emailEnabled,
 		PublicURL:        publicURL,

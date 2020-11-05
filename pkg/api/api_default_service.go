@@ -16,14 +16,13 @@ import (
 	"log"
 
 	"github.com/parvaeres/parvaeres/pkg/email"
-	"github.com/parvaeres/parvaeres/pkg/gitops"
 )
 
 // DefaultApiService is a service that implents the logic for the DefaultApiServicer
 // This service should implement the business logic for every endpoint for the DefaultApi API.
 // Include any external packages or services that will be required by this service.
 type DefaultApiService struct {
-	Gitops           *gitops.GitOpsClient
+	GitopsProvider   GitopsProviderInterface
 	EmailProvider    email.EmailProviderInterface
 	FeatureFlagEmail bool
 	PublicURL        string
@@ -42,7 +41,7 @@ func (s *DefaultApiService) RootGet(ctx context.Context) (interface{}, error) {
 // DeploymentDeploymentIdGet - Get the deployment with id deploymentId
 func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deploymentId string) (interface{}, error) {
 	log.Printf("DeploymentDeploymentIdGet: %v", deploymentId)
-	response, err := GetDeploymentByID(deploymentId, s.Gitops)
+	response, err := s.GitopsProvider.GetDeploymentByID(deploymentId)
 	if err == nil && len(response.Items) > 0 {
 		response.Items[0].LogsURL = fmt.Sprintf("%s/deployment/%s/logs", s.PublicURL, deploymentId)
 	}
@@ -53,7 +52,7 @@ func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deplo
 // DeploymentDeploymentIdLogsGet - Get the deployment with id deploymentId
 func (s *DefaultApiService) DeploymentDeploymentIdLogsGet(ctx context.Context, deploymentId string) (interface{}, error) {
 	log.Printf("DeploymentDeploymentIdLogsGet: %v", deploymentId)
-	response, _ := GetDeploymentLogs(deploymentId, s.Gitops)
+	response, _ := s.GitopsProvider.GetDeploymentLogs(deploymentId)
 	log.Printf("DeploymentDeploymentIdLogsGet: done")
 	return response, nil
 }
@@ -68,7 +67,7 @@ func (s *DefaultApiService) DeploymentGet(ctx context.Context, getDeploymentRequ
 // DeploymentPost - Create a new deployment
 func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeploymentRequest CreateDeploymentRequest) (interface{}, error) {
 	log.Printf("DeploymentPost: %v", createDeploymentRequest)
-	response, err := CreateDeployment(createDeploymentRequest, s.Gitops)
+	response, err := s.GitopsProvider.CreateDeployment(createDeploymentRequest)
 
 	// If deployment is created without errors
 	if err == nil {
