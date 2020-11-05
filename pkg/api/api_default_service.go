@@ -49,6 +49,14 @@ func (s *DefaultApiService) DeploymentDeploymentIdGet(ctx context.Context, deplo
 	return response, nil
 }
 
+// DeploymentDeploymentIdDelete - Get the deployment with id deploymentId
+func (s *DefaultApiService) DeploymentDeploymentIdDelete(ctx context.Context, deploymentId string) (interface{}, error) {
+	log.Printf("DeploymentDeploymentIdDelete: %v", deploymentId)
+	response, _ := s.GitopsProvider.DeleteDeployment(deploymentId)
+	log.Printf("DeploymentDeploymentIdDelete: %v", response)
+	return response, nil
+}
+
 // DeploymentDeploymentIdLogsGet - Get the deployment with id deploymentId
 func (s *DefaultApiService) DeploymentDeploymentIdLogsGet(ctx context.Context, deploymentId string) (interface{}, error) {
 	log.Printf("DeploymentDeploymentIdLogsGet: %v", deploymentId)

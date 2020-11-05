@@ -31,6 +31,12 @@ func NewDefaultApiController(s DefaultApiServicer) Router {
 func (c *DefaultApiController) Routes() Routes {
 	return Routes{
 		{
+			"DeploymentDeploymentIdDelete",
+			strings.ToUpper("Delete"),
+			"/v1/deployment/{deploymentId}",
+			c.DeploymentDeploymentIdDelete,
+		},
+		{
 			"DeploymentDeploymentIdGet",
 			strings.ToUpper("Get"),
 			"/v1/deployment/{deploymentId}",
@@ -61,6 +67,19 @@ func (c *DefaultApiController) Routes() Routes {
 			c.RootGet,
 		},
 	}
+}
+
+// DeploymentDeploymentIdDelete - Delete deployment with id deploymentId
+func (c *DefaultApiController) DeploymentDeploymentIdDelete(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	deploymentId := params["deploymentId"]
+	result, err := c.service.DeploymentDeploymentIdDelete(r.Context(), deploymentId)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+
+	EncodeJSONResponse(result, nil, w)
 }
 
 // DeploymentDeploymentIdGet - Get the deployment with id deploymentId

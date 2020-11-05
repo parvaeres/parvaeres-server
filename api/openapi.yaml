@@ -54,6 +54,24 @@ paths:
       summary: Create a new deployment
     summary: Deployments
   /deployment/{deploymentId}:
+    delete:
+      parameters:
+      - description: the id of the deployment to delete
+        explode: false
+        in: path
+        name: deploymentId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentStatus'
+          description: Accepted
+      summary: Delete deployment with id deploymentId
     description: This resource represents an individual deployment
     get:
       parameters:

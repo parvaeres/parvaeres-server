@@ -91,6 +91,38 @@ func (a *ArgoCD) CreateDeployment(request parvaeres.CreateDeploymentRequest) (*p
 	}, nil
 }
 
+//DeleteDeployment checks if deployment looks like a UUID and if yes wipes everything
+func (a *ArgoCD) DeleteDeployment(deploymentID string) (status *parvaeres.GetDeploymentResponse, err error) {
+	status = &parvaeres.GetDeploymentResponse{
+		Error:   true,
+		Message: "",
+		Items:   []parvaeres.DeploymentStatus{},
+	}
+
+	_, err = uuid.Parse(deploymentID)
+	if err != nil {
+		status.Message = err.Error()
+		return
+	}
+
+	//FIXME: improve error handling
+	err = a.ArgoCDclient.ArgoprojV1alpha1().Applications(a.ArgoCDNamespace).Delete(deploymentID, &metav1.DeleteOptions{})
+	if err != nil {
+		status.Message = status.Message + "\n" + err.Error()
+	}
+	err = a.KubernetesClient.CoreV1().Namespaces().Delete(deploymentID, &metav1.DeleteOptions{})
+	if err != nil {
+		status.Message = status.Message + "\n" + err.Error()
+	}
+
+	if err == nil {
+		status.Error = false
+		status.Message = "Deleting"
+	}
+
+	return
+}
+
 //EnableDeployment confirms the deployment to be deployed
 func (a *ArgoCD) EnableDeployment(deploymentID string) error {
 	application, err := a.getApplicationByName(deploymentID)

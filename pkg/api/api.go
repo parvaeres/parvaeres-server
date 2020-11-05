@@ -18,6 +18,7 @@ import (
 // The DefaultApiRouter implementation should parse necessary information from the http request,
 // pass the data to a DefaultApiServicer to perform the required actions, then write the service results to the http response.
 type DefaultApiRouter interface {
+	DeploymentDeploymentIdDelete(http.ResponseWriter, *http.Request)
 	DeploymentDeploymentIdGet(http.ResponseWriter, *http.Request)
 	DeploymentDeploymentIdLogsGet(http.ResponseWriter, *http.Request)
 	DeploymentGet(http.ResponseWriter, *http.Request)
@@ -30,6 +31,7 @@ type DefaultApiRouter interface {
 // while the service implementation can ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type DefaultApiServicer interface {
+	DeploymentDeploymentIdDelete(context.Context, string) (interface{}, error)
 	DeploymentDeploymentIdGet(context.Context, string) (interface{}, error)
 	DeploymentDeploymentIdLogsGet(context.Context, string) (interface{}, error)
 	DeploymentGet(context.Context, GetDeploymentRequest) (interface{}, error)
