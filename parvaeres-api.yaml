@@ -54,6 +54,13 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/CreateDeploymentRequest'
+      parameters:
+        - name: 'parvaerestoken'
+          in: header
+          required: false
+          description: a very rudimentary security token
+          schema:
+            type: string
       responses:
         '202':  # Accepted
           description: Accepted

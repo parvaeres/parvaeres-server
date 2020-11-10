@@ -31,6 +31,7 @@ func main() {
 		mailgunAPIKey   string
 		mailgunSender   string
 		emailEnabled    bool
+		adminToken      string
 	)
 
 	log.Printf("Server started")
@@ -76,6 +77,12 @@ func main() {
 		lookupEnvOrBool("PARVAERES_EMAIL_ENABLED", false),
 		"enable email delivery",
 	)
+	flag.StringVar(
+		&adminToken,
+		"admin-token",
+		lookupEnvOrString("PARVAERES_ADMIN_TOKEN", "parvaeres"),
+		"token to perform admin operations, pass as 'admintoken' header in API requests",
+	)
 	flag.Parse()
 
 	kubernetesConfig, err := argocd.GetKubernetesConfig(kubeconfig)
@@ -104,6 +111,7 @@ func main() {
 		},
 		FeatureFlagEmail: emailEnabled,
 		PublicURL:        publicURL,
+		AdminToken:       adminToken,
 	}
 	DefaultApiController := parvaeres.NewDefaultApiController(DefaultApiService)
 

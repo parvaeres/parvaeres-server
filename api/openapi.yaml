@@ -34,6 +34,15 @@ paths:
           description: OK
       summary: Get all deployments
     post:
+      parameters:
+      - description: a very rudimentary security token
+        explode: false
+        in: header
+        name: parvaerestoken
+        required: false
+        schema:
+          type: string
+        style: simple
       requestBody:
         content:
           application/json:

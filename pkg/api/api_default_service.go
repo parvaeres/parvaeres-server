@@ -26,6 +26,7 @@ type DefaultApiService struct {
 	EmailProvider    email.EmailProviderInterface
 	FeatureFlagEmail bool
 	PublicURL        string
+	AdminToken       string
 }
 
 // NewDefaultApiService creates a default api service
@@ -73,7 +74,7 @@ func (s *DefaultApiService) DeploymentGet(ctx context.Context, getDeploymentRequ
 }
 
 // DeploymentPost - Create a new deployment
-func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeploymentRequest CreateDeploymentRequest) (interface{}, error) {
+func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeploymentRequest CreateDeploymentRequest, token string) (interface{}, error) {
 	log.Printf("DeploymentPost: %v", createDeploymentRequest)
 	response, err := s.GitopsProvider.CreateDeployment(createDeploymentRequest)
 
@@ -94,7 +95,9 @@ func (s *DefaultApiService) DeploymentPost(ctx context.Context, createDeployment
 				log.Printf("confirmation email success: %s", emailResponse.ID)
 			}
 			// if email is enabled, we strip ID from API response
-			response.Items[0].UUID = ""
+			if token != s.AdminToken {
+				response.Items[0].UUID = ""
+			}
 		}
 	}
 	log.Printf("DeploymentPost: %v", response)

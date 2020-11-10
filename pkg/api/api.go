@@ -35,6 +35,6 @@ type DefaultApiServicer interface {
 	DeploymentDeploymentIdGet(context.Context, string) (interface{}, error)
 	DeploymentDeploymentIdLogsGet(context.Context, string) (interface{}, error)
 	DeploymentGet(context.Context, GetDeploymentRequest) (interface{}, error)
-	DeploymentPost(context.Context, CreateDeploymentRequest) (interface{}, error)
+	DeploymentPost(context.Context, CreateDeploymentRequest, string) (interface{}, error)
 	RootGet(context.Context) (interface{}, error)
 }

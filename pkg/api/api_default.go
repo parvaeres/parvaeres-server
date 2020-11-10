@@ -133,7 +133,8 @@ func (c *DefaultApiController) DeploymentPost(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	result, err := c.service.DeploymentPost(r.Context(), *createDeploymentRequest)
+	parvaerestoken := r.Header.Get("parvaerestoken")
+	result, err := c.service.DeploymentPost(r.Context(), *createDeploymentRequest, parvaerestoken)
 	if err != nil {
 		w.WriteHeader(500)
 		return
