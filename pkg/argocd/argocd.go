@@ -370,7 +370,7 @@ func getDeploymentStatusTypeOfApplication(application *v1alpha1.Application) par
 	if !reflect.DeepEqual(application.Status, v1alpha1.ApplicationStatus{}) {
 
 		// DEPLOYED: status is Healty and Synced
-		if application.Status.Health.Status == health.HealthStatusHealthy ||
+		if application.Status.Health.Status == health.HealthStatusHealthy &&
 			application.Status.Sync.Status == v1alpha1.SyncStatusCodeSynced {
 			return parvaeres.DEPLOYED
 		}
