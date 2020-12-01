@@ -99,8 +99,30 @@ var tests = []DeploymentStatusTypeTest{
 		},
 	},
 	{
-		description: "Given an application with SyncPolicy and HealthStatusHealthy",
+		description: "Given an application with SyncPolicy and SyncStatusCodeSynced",
 		status:      parvaeres.DEPLOYED,
+		application: &v1alpha1.Application{
+			Spec: v1alpha1.ApplicationSpec{
+				SyncPolicy: &v1alpha1.SyncPolicy{
+					Automated: &v1alpha1.SyncPolicyAutomated{
+						Prune:    true,
+						SelfHeal: true,
+					},
+				},
+			},
+			Status: v1alpha1.ApplicationStatus{
+				Health: v1alpha1.HealthStatus{
+					Status: health.HealthStatusHealthy,
+				},
+				Sync: v1alpha1.SyncStatus{
+					Status: v1alpha1.SyncStatusCodeSynced,
+				},
+			},
+		},
+	},
+	{
+		description: "Given an application with SyncPolicy and HealthStatusHealthy",
+		status:      parvaeres.SYNCING,
 		application: &v1alpha1.Application{
 			Spec: v1alpha1.ApplicationSpec{
 				SyncPolicy: &v1alpha1.SyncPolicy{
